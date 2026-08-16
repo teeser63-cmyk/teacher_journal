@@ -1,0 +1,2482 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>План воспитательной работы</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --border-color: #e2e8f0;
+            --shadow-color: rgba(0,0,0,0.05);
+            --calendar-hover: #f1f5f9;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --shadow-color: rgba(0,0,0,0.3);
+            --calendar-hover: #1e293b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border-color: var(--border-color);
+            box-shadow: 0 1px 3px var(--shadow-color);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        .toast-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        /* Стили календаря */
+        .calendar-day {
+            aspect-ratio: 1;
+            min-height: 60px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .calendar-day:hover {
+            background-color: var(--calendar-hover);
+            transform: scale(1.02);
+            z-index: 2;
+        }
+
+        .calendar-day .day-number {
+            font-size: 13px;
+            font-weight: 600;
+            position: absolute;
+            top: 4px;
+            right: 6px;
+        }
+
+        .calendar-day .day-dots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .calendar-day .day-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .calendar-day.has-event {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .calendar-day.has-event.completed {
+            background-color: rgba(16, 185, 129, 0.15);
+        }
+
+        .calendar-day.is-holiday {
+            background-color: rgba(251, 191, 36, 0.15);
+            border: 2px dashed #fbbf24;
+        }
+
+        .calendar-day.is-weekend {
+            color: #ef4444;
+        }
+
+        .calendar-day.is-today {
+            border: 2px solid #3b82f6;
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.4;
+        }
+
+        .calendar-day .event-count {
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0px 4px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        /* Легенда календаря */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Стили для модалки деталей дня */
+        .day-detail-event {
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            border-left: 3px solid #3b82f6;
+            background: var(--bg-primary);
+            transition: all 0.2s;
+        }
+
+        .day-detail-event:hover {
+            transform: translateX(4px);
+        }
+
+        .day-detail-event.completed {
+            border-left-color: #10b981;
+            opacity: 0.7;
+        }
+
+        .day-detail-event .event-type {
+            font-size: 10px;
+            font-weight: 600;
+            color: #3b82f6;
+        }
+
+        .day-detail-event.completed .event-type {
+            color: #10b981;
+        }
+
+        @media print {
+            body { background: white !important; }
+            .print-hidden { display: none !important; }
+            #view-official { display: block !important; }
+            .container-print {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            @page { 
+                size: landscape; 
+                margin: 10mm;
+                @bottom-center {
+                    content: "Страница " counter(page) " из " counter(pages);
+                    font-size: 9pt;
+                }
+            }
+            .week-block {
+                page-break-after: always;
+            }
+            .table-container {
+                page-break-inside: avoid;
+            }
+            [data-theme="dark"] {
+                --bg-primary: white;
+                --bg-secondary: white;
+                --bg-card: white;
+                --text-primary: black;
+                --text-secondary: #475569;
+                --border-color: #1e293b;
+            }
+        }
+
+        [data-theme="dark"] .bg-white { background-color: #1e293b !important; }
+        [data-theme="dark"] .bg-slate-50 { background-color: #0f172a !important; }
+        [data-theme="dark"] .bg-slate-100 { background-color: #1e293b !important; }
+        [data-theme="dark"] .text-slate-800 { color: #f1f5f9 !important; }
+        [data-theme="dark"] .text-slate-700 { color: #e2e8f0 !important; }
+        [data-theme="dark"] .text-slate-600 { color: #cbd5e1 !important; }
+        [data-theme="dark"] .text-slate-500 { color: #94a3b8 !important; }
+        [data-theme="dark"] .border-slate-200 { border-color: #334155 !important; }
+        [data-theme="dark"] .border-slate-300 { border-color: #475569 !important; }
+        [data-theme="dark"] .bg-slate-900 { background-color: #0f172a !important; }
+        [data-theme="dark"] .bg-slate-800 { background-color: #1e293b !important; }
+        [data-theme="dark"] .hover\:bg-slate-50:hover { background-color: #1e293b !important; }
+        [data-theme="dark"] .hover\:bg-slate-100:hover { background-color: #334155 !important; }
+        [data-theme="dark"] .calendar-day:hover { background-color: #1e293b !important; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col selection:bg-blue-100 selection:text-blue-900">
+
+    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-30 print-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-600 p-2.5 rounded-xl shadow-md text-white flex items-center justify-center" id="icon-book"></div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
+                            План воспитательной работы
+                            <span class="bg-blue-500/30 text-blue-200 text-xs px-2.5 py-0.5 rounded-full border border-blue-400/30">10 класс</span>
+                        </h1>
+                        <p class="text-xs text-slate-400">На I полугодие 2026/2027 учебного года</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleTheme()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg transition-all border border-slate-700 flex items-center gap-1.5" title="Переключить тему">
+                        <span id="icon-theme"></span>
+                    </button>
+                    <button onclick="openWeekModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-medium px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 shadow-sm">
+                        <span id="icon-cal-plus"></span> <span class="hidden sm:inline">Новая неделя</span>
+                    </button>
+                    <button onclick="openEventModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg transition-all border border-slate-700 flex items-center gap-1.5">
+                        <span id="icon-evt-plus"></span> <span class="hidden md:inline">Событие</span>
+                    </button>
+                    <button onclick="showImportExport()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg transition-all border border-slate-700 flex items-center gap-1.5">
+                        <span id="icon-import"></span> <span class="hidden lg:inline">Импорт/Экспорт</span>
+                    </button>
+                    <button onclick="printDocument()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-medium px-3 py-2 rounded-lg transition-all shadow-sm flex items-center gap-1.5 ml-2">
+                        <span id="icon-print"></span> <span>Печать</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="bg-white border-b border-slate-200 sticky top-16 z-20 print-hidden shadow-sm" data-theme-aware>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex space-x-1 sm:space-x-4 overflow-x-auto py-2 custom-scrollbar text-xs sm:text-sm font-medium" id="tabs-nav">
+                <button onclick="setTab('manage')" id="tab-manage" class="px-3 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap transition-colors text-blue-600 bg-blue-50 font-semibold">
+                    <span id="icon-list"></span> Управление планом
+                </button>
+                <button onclick="setTab('status')" id="tab-status" class="px-3 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap transition-colors text-slate-600 hover:bg-slate-100">
+                    <span id="icon-pie"></span> Анализ & Статус
+                </button>
+                <button onclick="setTab('calendar')" id="tab-calendar" class="px-3 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap transition-colors text-slate-600 hover:bg-slate-100">
+                    <span id="icon-calendar"></span> Календарь
+                </button>
+                <button onclick="setTab('official')" id="tab-official" class="px-3 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap transition-colors text-slate-600 hover:bg-slate-100">
+                    <span id="icon-contract"></span> Официальный документ
+                </button>
+                <button onclick="setTab('progress')" id="tab-progress" class="px-3 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap transition-colors text-slate-600 hover:bg-slate-100">
+                    <span id="icon-chart"></span> Прогресс
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 print:p-0 print:m-0 print:max-w-none">
+        
+        <!-- Вкладка 1: Управление -->
+        <div id="view-manage" class="space-y-6 fade-in block">
+            <div class="flex flex-wrap items-center justify-between gap-4 print-hidden">
+                <div class="flex items-center gap-3">
+                    <button onclick="generateMonthWeeks()" class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-lg transition-colors font-medium flex items-center gap-1.5">
+                        <span id="icon-gen"></span> Сгенерировать месяц
+                    </button>
+                    <button onclick="undoAction()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg transition-colors font-medium flex items-center gap-1.5" id="undo-btn" disabled>
+                        <span id="icon-undo"></span> Отменить
+                    </button>
+                    <button onclick="redoAction()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg transition-colors font-medium flex items-center gap-1.5" id="redo-btn" disabled>
+                        <span id="icon-redo"></span> Повторить
+                    </button>
+                </div>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <input type="text" id="search-input" placeholder="Поиск мероприятий..." class="text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-800">
+                    <select id="filter-type" class="text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-800">
+                        <option value="">Все типы</option>
+                    </select>
+                </div>
+            </div>
+            <div id="manage-content"></div>
+        </div>
+
+        <!-- Вкладка 2: Статус -->
+        <div id="view-status" class="space-y-6 fade-in hidden">
+            <div id="status-content"></div>
+        </div>
+
+        <!-- Вкладка 3: Календарь -->
+        <div id="view-calendar" class="fade-in hidden">
+            <div id="calendar-content"></div>
+        </div>
+
+        <!-- Вкладка 4: Официальный документ -->
+        <div id="view-official" class="fade-in hidden">
+            <div class="bg-white p-8 rounded-2xl border border-slate-300 shadow-lg max-w-[1200px] mx-auto container-print text-slate-900 leading-normal text-[11px]">
+                <div class="flex justify-between items-start mb-6 print:mb-4">
+                    <div class="w-1/2"></div>
+                    <div class="w-1/2 text-right">
+                        <p>Утверждаю</p>
+                        <p>Директор государственного</p>
+                        <p>учреждения образования</p>
+                        <p>«Средняя школа № 5 г. Жлобина»</p>
+                        <p class="mt-4">________________________</p>
+                        <p class="mt-2">«___» ___________________ 2026 г.</p>
+                    </div>
+                </div>
+                
+                <div class="text-center font-bold mb-6 text-sm uppercase tracking-wide">
+                    <p>План воспитательной работы</p>
+                    <p>c учащимися 10 класса</p>
+                    <p>на I полугодие 2026/2027 учебный год</p>
+                </div>
+
+                <div class="overflow-x-auto print:overflow-visible table-container">
+                    <table class="w-full border-collapse border border-slate-800 text-center align-top bg-white">
+                        <thead class="bg-slate-100 font-bold" id="official-table-head"></thead>
+                        <tbody id="official-table-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="mt-8 text-[11px] w-full" style="break-inside: avoid;">
+                    <p class="mb-6">В плане работы возможны изменения и дополнения.</p>
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <p>Согласовано</p>
+                            <p>заместитель директора</p>
+                            <p>по воспитательной работе</p>
+                        </div>
+                        <div class="text-right">
+                            <p>_______ Я. И. Косикова</p>
+                            <p class="mt-1">__.__.2026</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка 5: Прогресс -->
+        <div id="view-progress" class="fade-in hidden">
+            <div id="progress-content"></div>
+        </div>
+    </main>
+
+    <!-- Модалка Недели -->
+    <div id="modal-week" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg my-8 flex flex-col animate-fade-in-up" data-theme-aware>
+            <div class="bg-slate-900 text-white px-5 py-4 flex justify-between items-center rounded-t-2xl">
+                <h3 class="font-bold text-base flex items-center gap-2" id="week-modal-title">Новая учебная неделя</h3>
+                <button onclick="closeWeekModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <span id="icon-x-1"></span>
+                </button>
+            </div>
+            
+            <form id="form-week" onsubmit="saveWeek(event)" class="p-6 space-y-4 text-sm">
+                <input type="hidden" id="week-id" value="">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Дата начала *</label>
+                        <input type="date" id="week-start" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-800 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Дата конца *</label>
+                        <input type="date" id="week-end" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-800 bg-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Тема недели *</label>
+                    <textarea id="week-theme" required placeholder="Введите название темы..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-800 resize-none h-20 bg-white"></textarea>
+                </div>
+                <div id="week-errors" class="text-rose-600 text-xs hidden"></div>
+                
+                <div class="pt-4 flex justify-end gap-3 border-t border-slate-100">
+                    <button type="button" onclick="closeWeekModal()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors">Отмена</button>
+                    <button type="submit" id="week-submit-btn" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg shadow-sm transition-all">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модалка Мероприятия -->
+    <div id="modal-event" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-8 flex flex-col animate-fade-in-up" data-theme-aware>
+            <div class="bg-slate-900 text-white px-5 py-4 flex justify-between items-center rounded-t-2xl">
+                <h3 class="font-bold text-base flex items-center gap-2">Добавить мероприятие</h3>
+                <button onclick="closeEventModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <span id="icon-x-2"></span>
+                </button>
+            </div>
+            
+            <form id="form-event" onsubmit="saveEvent(event)" class="p-6 space-y-4 text-sm max-h-[75vh] overflow-y-auto custom-scrollbar">
+                <input type="hidden" id="event-id" value="">
+                
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Выберите неделю *</label>
+                    <select id="event-week" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-800 bg-white"></select>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Дата проведения *</label>
+                        <input type="date" id="event-date" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-800 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Обязательное условие</label>
+                        <select id="event-type" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-800 bg-white"></select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Направление воспитания (Колонка) *</label>
+                    <select id="event-direction" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-800 bg-white"></select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Тема / Название мероприятия *</label>
+                    <input type="text" id="event-topic" required placeholder="Например: Беседа «Трезво жить...»" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-800 bg-white">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Ответственный (ФИО) *</label>
+                    <input type="text" id="event-responsible" required placeholder="Например: Барейша И. А." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-800 bg-white">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Выполнено</label>
+                    <input type="checkbox" id="event-completed" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" onclick="applyTemplate('CLASS_HOUR')" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg transition-colors">📚 Классный час</button>
+                    <button type="button" onclick="applyTemplate('PDD')" class="text-xs bg-green-50 hover:bg-green-100 text-green-700 px-3 py-1.5 rounded-lg transition-colors">🚦 ПДД</button>
+                    <button type="button" onclick="applyTemplate('SHAG')" class="text-xs bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg transition-colors">🇧🇾 ШАГ</button>
+                </div>
+
+                <div id="event-errors" class="text-rose-600 text-xs hidden"></div>
+
+                <div class="pt-4 mt-2 flex justify-end gap-3 border-t border-slate-100 sticky bottom-0 bg-white" data-theme-aware>
+                    <button type="button" onclick="closeEventModal()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors">Закрыть</button>
+                    <button type="submit" id="event-submit-btn" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg shadow-sm transition-all">Добавить мероприятие</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модалка Детали дня -->
+    <div id="modal-day-detail" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg my-8 flex flex-col animate-fade-in-up" data-theme-aware>
+            <div class="bg-slate-900 text-white px-5 py-4 flex justify-between items-center rounded-t-2xl">
+                <h3 class="font-bold text-base flex items-center gap-2" id="day-detail-title">Мероприятия на день</h3>
+                <button onclick="closeDayDetail()" class="text-slate-400 hover:text-white transition-colors">
+                    <span id="icon-x-3"></span>
+                </button>
+            </div>
+            <div class="p-6 max-h-[60vh] overflow-y-auto custom-scrollbar" id="day-detail-content">
+                <!-- Заполняется динамически -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка Импорт/Экспорт -->
+    <div id="modal-import-export" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md my-8 flex flex-col animate-fade-in-up" data-theme-aware>
+            <div class="bg-slate-900 text-white px-5 py-4 flex justify-between items-center rounded-t-2xl">
+                <h3 class="font-bold text-base flex items-center gap-2">Импорт / Экспорт</h3>
+                <button onclick="closeImportExport()" class="text-slate-400 hover:text-white transition-colors">
+                    <span id="icon-x-4"></span>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <button onclick="exportData()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <span id="icon-download"></span> Экспортировать данные
+                </button>
+                <div class="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer" onclick="document.getElementById('import-file').click()">
+                    <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(this.files[0])">
+                    <span id="icon-upload" class="text-slate-400"></span>
+                    <p class="text-sm text-slate-600 mt-2">Нажмите или перетащите файл JSON для импорта</p>
+                </div>
+                <div id="restore-backups" class="space-y-2">
+                    <p class="text-xs font-semibold text-slate-700">Последние резервные копии:</p>
+                    <div id="backup-list" class="space-y-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Тост уведомление -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 print-hidden pointer-events-none toast-slide-in">
+        <span id="toast-icon"></span>
+        <span class="text-xs font-medium" id="toast-text">Мероприятие успешно добавлено</span>
+    </div>
+
+    <!-- Контекстное меню -->
+    <div id="context-menu" class="fixed hidden bg-white rounded-lg shadow-xl border border-slate-200 py-1 z-50 print-hidden" data-theme-aware>
+        <button onclick="contextMenuAction('complete')" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 transition-colors flex items-center gap-2">
+            <span id="icon-check"></span> Отметить выполненным
+        </button>
+        <button onclick="contextMenuAction('edit')" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 transition-colors flex items-center gap-2">
+            <span id="icon-edit-sm"></span> Редактировать
+        </button>
+        <button onclick="contextMenuAction('delete')" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 transition-colors flex items-center gap-2 text-rose-600">
+            <span id="icon-trash-sm"></span> Удалить
+        </button>
+    </div>
+
+    <script>
+        // ============================================
+        // Иконки SVG
+        // ============================================
+        const ICONS = {
+            book: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>`,
+            calendarPlus: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="10" y1="16" x2="14" y2="16"></line><line x1="12" y1="14" x2="12" y2="18"></line></svg>`,
+            eventPlus: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>`,
+            print: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>`,
+            pie: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>`,
+            list: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`,
+            contract: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>`,
+            trash: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>`,
+            edit: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path><path d="m15 5 4 4"></path></svg>`,
+            x: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+            check: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+            alert: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
+            info: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`,
+            theme: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`,
+            import: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`,
+            calendar: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+            undo: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`,
+            redo: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>`,
+            chart: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="9" y1="15" x2="15" y2="9"></line></svg>`,
+            download: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`,
+            upload: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`,
+            'check-sm': `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+            'edit-sm': `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path><path d="m15 5 4 4"></path></svg>`,
+            'trash-sm': `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>`,
+            gen: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"></path></svg>`
+        };
+
+        // Вставка иконок
+        document.getElementById('icon-book').innerHTML = ICONS.book;
+        document.getElementById('icon-cal-plus').innerHTML = ICONS.calendarPlus;
+        document.getElementById('icon-evt-plus').innerHTML = ICONS.eventPlus;
+        document.getElementById('icon-print').innerHTML = ICONS.print;
+        document.getElementById('icon-list').innerHTML = ICONS.list;
+        document.getElementById('icon-pie').innerHTML = ICONS.pie;
+        document.getElementById('icon-contract').innerHTML = ICONS.contract;
+        document.getElementById('icon-x-1').innerHTML = ICONS.x;
+        document.getElementById('icon-x-2').innerHTML = ICONS.x;
+        document.getElementById('icon-x-3').innerHTML = ICONS.x;
+        document.getElementById('icon-x-4').innerHTML = ICONS.x;
+        document.getElementById('icon-theme').innerHTML = ICONS.theme;
+        document.getElementById('icon-import').innerHTML = ICONS.import;
+        document.getElementById('icon-calendar').innerHTML = ICONS.calendar;
+        document.getElementById('icon-undo').innerHTML = ICONS.undo;
+        document.getElementById('icon-redo').innerHTML = ICONS.redo;
+        document.getElementById('icon-chart').innerHTML = ICONS.chart;
+        document.getElementById('icon-download').innerHTML = ICONS.download;
+        document.getElementById('icon-upload').innerHTML = ICONS.upload;
+        document.getElementById('icon-check').innerHTML = ICONS['check-sm'];
+        document.getElementById('icon-edit-sm').innerHTML = ICONS['edit-sm'];
+        document.getElementById('icon-trash-sm').innerHTML = ICONS['trash-sm'];
+        document.getElementById('icon-gen').innerHTML = ICONS.gen;
+        document.getElementById('toast-icon').innerHTML = ICONS.check;
+        document.getElementById('toast-icon').querySelector('svg').classList.add('text-emerald-400');
+
+        // ============================================
+        // Константы и настройки
+        // ============================================
+        const DIRECTIONS = [
+            "Идеологическое, гражданское, патриотическое воспитание",
+            "Духовно-нравственное, поликультурное и эстетическое воспитание",
+            "Воспитание культуры безопасной жизнедеятельности и здорового образа жизни, воспитание информационной культуры",
+            "Правовое воспитание",
+            "Воспитание психологической культуры, стремление к самопознанию и саморазвитию",
+            "Экономическое, трудовое, профессиональное и экологическое воспитание",
+            "Семейное и гендерное воспитание. Взаимодействие с семьями учащихся",
+            "Воспитание культуры быта и досуга. Шестой школьный день"
+        ];
+
+        const SPECIAL_TYPES = {
+            NONE: "Обычное мероприятие",
+            CLASS_HOUR: "Классный час",
+            INFO_HOUR: "Информационный час",
+            GENOCIDE: "Инфо. час (Геноцид)",
+            PDD: "Занятие по ПДД",
+            SHPP: "ШПП (Школа правового просвещения)",
+            SHAG: "ШАГ",
+            PSYCHO: "Моё психологическое благополучие",
+            FAMILY: "Я. Моя Семья. Моя Родина"
+        };
+
+        const TEMPLATES = {
+            CLASS_HOUR: {
+                type: SPECIAL_TYPES.CLASS_HOUR,
+                direction: "Духовно-нравственное, поликультурное и эстетическое воспитание",
+                responsible: "Классный руководитель"
+            },
+            PDD: {
+                type: SPECIAL_TYPES.PDD,
+                direction: "Воспитание культуры безопасной жизнедеятельности и здорового образа жизни",
+                responsible: "Инспектор ИДН"
+            },
+            SHAG: {
+                type: SPECIAL_TYPES.SHAG,
+                direction: "Идеологическое, гражданское, патриотическое воспитание",
+                responsible: "Классный руководитель"
+            }
+        };
+
+        // Каникулы
+        const HOLIDAYS = [
+            {
+                name: "Осенние каникулы",
+                start: "2026-11-02",
+                end: "2026-11-08",
+                color: "#f59e0b"
+            },
+            {
+                name: "Зимние каникулы",
+                start: "2026-12-28",
+                end: "2027-01-10",
+                color: "#3b82f6"
+            },
+            {
+                name: "Весенние каникулы",
+                start: "2027-03-22",
+                end: "2027-03-28",
+                color: "#10b981"
+            }
+        ];
+
+        // Цвета для типов мероприятий
+        const EVENT_COLORS = {
+            "Классный час": "#3b82f6",
+            "Информационный час": "#8b5cf6",
+            "Инфо. час (Геноцид)": "#ef4444",
+            "Занятие по ПДД": "#f59e0b",
+            "ШПП (Школа правового просвещения)": "#06b6d4",
+            "ШАГ": "#10b981",
+            "Моё психологическое благополучие": "#ec4899",
+            "Я. Моя Семья. Моя Родина": "#f472b6",
+            "Обычное мероприятие": "#6b7280"
+        };
+
+        const TYPE_COLORS = {
+            "Классный час": "#3b82f6",
+            "Информационный час": "#8b5cf6",
+            "Инфо. час (Геноцид)": "#ef4444",
+            "Занятие по ПДД": "#f59e0b",
+            "ШПП (Школа правового просвещения)": "#06b6d4",
+            "ШАГ": "#10b981",
+            "Моё психологическое благополучие": "#ec4899",
+            "Я. Моя Семья. Моя Родина": "#f472b6",
+            "Обычное мероприятие": "#6b7280"
+        };
+
+        // ============================================
+        // Состояние приложения
+        // ============================================
+        let state = {
+            weeks: [],
+            events: []
+        };
+
+        let activeTab = 'manage';
+        let contextTarget = null;
+        let searchTerm = '';
+        let filterType = '';
+        let currentCalendarMonth = new Date().getMonth();
+        let currentCalendarYear = new Date().getFullYear();
+
+        // ============================================
+        // History Manager
+        // ============================================
+        class HistoryManager {
+            constructor(maxHistory = 50) {
+                this.history = [];
+                this.currentIndex = -1;
+                this.maxHistory = maxHistory;
+                this.isRestoring = false;
+            }
+
+            push(data) {
+                if (this.isRestoring) return;
+                this.history = this.history.slice(0, this.currentIndex + 1);
+                this.history.push(JSON.stringify(data));
+                if (this.history.length > this.maxHistory) {
+                    this.history.shift();
+                }
+                this.currentIndex = this.history.length - 1;
+                this.updateButtons();
+            }
+
+            undo() {
+                if (this.currentIndex > 0) {
+                    this.currentIndex--;
+                    this.isRestoring = true;
+                    const result = JSON.parse(this.history[this.currentIndex]);
+                    this.isRestoring = false;
+                    this.updateButtons();
+                    return result;
+                }
+                return null;
+            }
+
+            redo() {
+                if (this.currentIndex < this.history.length - 1) {
+                    this.currentIndex++;
+                    this.isRestoring = true;
+                    const result = JSON.parse(this.history[this.currentIndex]);
+                    this.isRestoring = false;
+                    this.updateButtons();
+                    return result;
+                }
+                return null;
+            }
+
+            updateButtons() {
+                const undoBtn = document.getElementById('undo-btn');
+                const redoBtn = document.getElementById('redo-btn');
+                if (undoBtn) undoBtn.disabled = this.currentIndex <= 0;
+                if (redoBtn) redoBtn.disabled = this.currentIndex >= this.history.length - 1;
+            }
+
+            canUndo() { return this.currentIndex > 0; }
+            canRedo() { return this.currentIndex < this.history.length - 1; }
+        }
+
+        const historyManager = new HistoryManager();
+
+        // ============================================
+        // Утилиты
+        // ============================================
+        function sanitizeInput(input) {
+            return String(input || '').replace(/[<>]/g, '').trim();
+        }
+
+        function formatDateRu(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth()+1).toString().padStart(2, '0')}`;
+        }
+
+        function formatDateFullRu(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            return `${d.getDate()} ${['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'][d.getMonth()]} ${d.getFullYear()}`;
+        }
+
+        function formatDate(date) {
+            const z = n => ('0' + n).slice(-2);
+            return `${date.getFullYear()}-${z(date.getMonth()+1)}-${z(date.getDate())}`;
+        }
+
+        function getMonthString(dateString) {
+            return dateString ? dateString.substring(0, 7) : "";
+        }
+
+        function getFullMonthName(monthStr) {
+            if (!monthStr) return '';
+            const [year, month] = monthStr.split('-');
+            const date = new Date(year, parseInt(month) - 1, 1);
+            return date.toLocaleString('ru-RU', { month: 'long', year: 'numeric' });
+        }
+
+        function isFirstWeekOfMonth(week, allWeeks) {
+            if (!week || !week.startDate || !allWeeks || allWeeks.length === 0) return false;
+            const weekMonth = getMonthString(week.startDate);
+            const weeksInMonth = allWeeks.filter(w => getMonthString(w.startDate) === weekMonth);
+            if (weeksInMonth.length === 0) return false;
+            weeksInMonth.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+            return weeksInMonth[0].id === week.id;
+        }
+
+        function isLastThursday(dateString) {
+            const date = new Date(dateString);
+            if (date.getDay() !== 4) return false;
+            const nextWeek = new Date(date);
+            nextWeek.setDate(date.getDate() + 7);
+            return nextWeek.getMonth() !== date.getMonth();
+        }
+
+        function getWeekById(id) {
+            return state.weeks.find(w => w.id === id);
+        }
+
+        function getEventsForWeek(weekId) {
+            return state.events.filter(e => e.weekId === weekId);
+        }
+
+        function getEventsForDate(dateStr) {
+            return state.events.filter(e => e.date === dateStr);
+        }
+
+        function getCompletedEvents() {
+            return state.events.filter(e => e.completed);
+        }
+
+        function getProgress() {
+            const total = state.events.length;
+            const completed = getCompletedEvents().length;
+            return total ? Math.round((completed / total) * 100) : 0;
+        }
+
+        function generateId() {
+            return Date.now().toString() + '_' + Math.random().toString(36).substr(2, 6);
+        }
+
+        function isHoliday(dateStr) {
+            const date = new Date(dateStr);
+            return HOLIDAYS.some(h => {
+                const start = new Date(h.start);
+                const end = new Date(h.end);
+                return date >= start && date <= end;
+            });
+        }
+
+        function getHolidayName(dateStr) {
+            const date = new Date(dateStr);
+            const holiday = HOLIDAYS.find(h => {
+                const start = new Date(h.start);
+                const end = new Date(h.end);
+                return date >= start && date <= end;
+            });
+            return holiday ? holiday.name : null;
+        }
+
+        function getEventColor(type) {
+            return TYPE_COLORS[type] || '#6b7280';
+        }
+
+        function getTypeLabel(type) {
+            return type || 'Обычное мероприятие';
+        }
+
+        function isWeekend(dateStr) {
+            const date = new Date(dateStr);
+            return date.getDay() === 0 || date.getDay() === 6;
+        }
+
+        function isToday(dateStr) {
+            const today = new Date();
+            const date = new Date(dateStr);
+            return date.getFullYear() === today.getFullYear() &&
+                   date.getMonth() === today.getMonth() &&
+                   date.getDate() === today.getDate();
+        }
+
+        // ============================================
+        // Toast уведомления
+        // ============================================
+        let toastTimeout = null;
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const text = document.getElementById('toast-text');
+            const icon = document.getElementById('toast-icon');
+            
+            text.textContent = message;
+            
+            const icons = {
+                success: ICONS.check,
+                error: ICONS.alert,
+                info: ICONS.info,
+                warning: ICONS.alert
+            };
+            
+            icon.innerHTML = icons[type] || icons.success;
+            const colorMap = {
+                success: 'text-emerald-400',
+                error: 'text-rose-400',
+                warning: 'text-amber-400',
+                info: 'text-blue-400'
+            };
+            icon.querySelector('svg')?.classList.add(colorMap[type] || 'text-emerald-400');
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // ============================================
+        // Обработка ошибок
+        // ============================================
+        function handleError(error, context) {
+            console.error(`[${context}] Ошибка:`, error);
+            const errorMessages = {
+                'saveWeek': 'Не удалось сохранить неделю. Попробуйте снова.',
+                'deleteWeek': 'Не удалось удалить неделю. Проверьте, нет ли привязанных мероприятий.',
+                'saveEvent': 'Не удалось сохранить мероприятие. Проверьте заполнение полей.',
+                'deleteEvent': 'Не удалось удалить мероприятие.',
+                'import': 'Ошибка импорта данных. Проверьте формат файла.',
+                'export': 'Ошибка экспорта данных.',
+                'restore': 'Ошибка восстановления данных.'
+            };
+            showToast(errorMessages[context] || 'Произошла ошибка', 'error');
+        }
+
+        // ============================================
+        // Валидация
+        // ============================================
+        function validateWeek(weekData) {
+            const errors = [];
+            if (!weekData.startDate) errors.push('Дата начала обязательна');
+            if (!weekData.endDate) errors.push('Дата окончания обязательна');
+            if (!weekData.theme || weekData.theme.trim().length < 3) {
+                errors.push('Тема недели должна содержать минимум 3 символа');
+            }
+            const start = new Date(weekData.startDate);
+            const end = new Date(weekData.endDate);
+            if (start > end) errors.push('Дата начала не может быть позже даты окончания');
+            const currentId = weekData.id;
+            const overlap = state.weeks.some(w => {
+                if (w.id === currentId) return false;
+                const wStart = new Date(w.startDate);
+                const wEnd = new Date(w.endDate);
+                return (wStart <= start && start <= wEnd) || (wStart <= end && end <= wEnd);
+            });
+            if (overlap) errors.push('Эта неделя пересекается с существующей');
+            return errors;
+        }
+
+        function validateEvent(eventData) {
+            const errors = [];
+            if (!eventData.weekId) errors.push('Не выбрана неделя');
+            if (!eventData.date) errors.push('Дата проведения обязательна');
+            if (!eventData.direction) errors.push('Направление обязательно');
+            if (!eventData.topic || eventData.topic.trim().length < 2) {
+                errors.push('Тема мероприятия должна содержать минимум 2 символа');
+            }
+            if (!eventData.responsible || eventData.responsible.trim().length < 2) {
+                errors.push('Укажите ответственного');
+            }
+            return errors;
+        }
+
+        // ============================================
+        // Сохранение состояния
+        // ============================================
+        function saveState() {
+            try {
+                localStorage.setItem('educationPlan_data', JSON.stringify(state));
+            } catch (e) {
+                console.warn('Не удалось сохранить состояние:', e);
+            }
+        }
+
+        function loadState() {
+            try {
+                const data = localStorage.getItem('educationPlan_data');
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    state.weeks = parsed.weeks || [];
+                    state.events = parsed.events || [];
+                    return true;
+                }
+            } catch (e) {
+                console.warn('Не удалось загрузить состояние:', e);
+            }
+            return false;
+        }
+
+        function pushHistory() {
+            historyManager.push(state);
+            saveState();
+        }
+
+        // ============================================
+        // Автосохранение
+        // ============================================
+        let autoSaveTimeout = null;
+
+        function triggerAutoSave() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                saveState();
+            }, 2000);
+        }
+
+        // ============================================
+        // Резервное копирование
+        // ============================================
+        function autoBackup() {
+            try {
+                const backup = {
+                    timestamp: new Date().toISOString(),
+                    data: state
+                };
+                const backups = JSON.parse(localStorage.getItem('educationPlan_backups') || '[]');
+                backups.push(backup);
+                while (backups.length > 10) {
+                    backups.shift();
+                }
+                localStorage.setItem('educationPlan_backups', JSON.stringify(backups));
+            } catch (e) {
+                console.warn('Не удалось создать резервную копию:', e);
+            }
+        }
+
+        function getBackups() {
+            try {
+                return JSON.parse(localStorage.getItem('educationPlan_backups') || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function restoreBackup(timestamp) {
+            try {
+                const backups = getBackups();
+                const backup = backups.find(b => b.timestamp === timestamp);
+                if (backup) {
+                    state.weeks = backup.data.weeks || [];
+                    state.events = backup.data.events || [];
+                    pushHistory();
+                    renderCurrentView();
+                    showToast(`Восстановлены данные от ${new Date(timestamp).toLocaleString()}`, 'success');
+                    closeImportExport();
+                }
+            } catch (e) {
+                handleError(e, 'restore');
+            }
+        }
+
+        // ============================================
+        // Импорт/Экспорт
+        // ============================================
+        function exportData() {
+            try {
+                const data = JSON.stringify(state, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `plan_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('Данные экспортированы', 'success');
+                closeImportExport();
+            } catch (e) {
+                handleError(e, 'export');
+            }
+        }
+
+        function importData(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.weeks || !data.events) {
+                        throw new Error('Неверный формат файла');
+                    }
+                    state.weeks = data.weeks || [];
+                    state.events = data.events || [];
+                    pushHistory();
+                    renderCurrentView();
+                    showToast('Данные успешно импортированы', 'success');
+                    closeImportExport();
+                } catch (error) {
+                    handleError(error, 'import');
+                }
+            };
+            reader.onerror = () => {
+                handleError(new Error('Ошибка чтения файла'), 'import');
+            };
+            reader.readAsText(file);
+        }
+
+        // ============================================
+        // Шаблоны мероприятий
+        // ============================================
+        function applyTemplate(templateName) {
+            const template = TEMPLATES[templateName];
+            if (!template) return;
+            document.getElementById('event-type').value = template.type;
+            document.getElementById('event-direction').value = template.direction;
+            if (template.responsible && !document.getElementById('event-responsible').value) {
+                document.getElementById('event-responsible').value = template.responsible;
+            }
+            if (templateName === 'CLASS_HOUR') {
+                const topic = document.getElementById('event-topic');
+                if (!topic.value) topic.value = 'Классный час на тему...';
+            }
+        }
+
+        // ============================================
+        // Undo/Redo
+        // ============================================
+        function undoAction() {
+            if (!historyManager.canUndo()) return;
+            const restored = historyManager.undo();
+            if (restored) {
+                state.weeks = restored.weeks || [];
+                state.events = restored.events || [];
+                renderCurrentView();
+                showToast('Отменено', 'info');
+            }
+        }
+
+        function redoAction() {
+            if (!historyManager.canRedo()) return;
+            const restored = historyManager.redo();
+            if (restored) {
+                state.weeks = restored.weeks || [];
+                state.events = restored.events || [];
+                renderCurrentView();
+                showToast('Повторено', 'info');
+            }
+        }
+
+        // ============================================
+        // Генерация недель на месяц
+        // ============================================
+        function generateMonthWeeks() {
+            const year = prompt('Введите год:', '2026');
+            if (!year) return;
+            const month = prompt('Введите номер месяца (1-12):', '9');
+            if (!month) return;
+            const monthNum = parseInt(month);
+            if (monthNum < 1 || monthNum > 12) {
+                showToast('Некорректный месяц', 'error');
+                return;
+            }
+            const daysInMonth = new Date(year, monthNum, 0).getDate();
+            const weeks = [];
+            let currentDate = new Date(year, monthNum - 1, 1);
+            while (currentDate.getMonth() === monthNum - 1) {
+                while (currentDate.getDay() !== 1) {
+                    currentDate.setDate(currentDate.getDate() - 1);
+                }
+                const startDate = new Date(currentDate);
+                const endDate = new Date(currentDate);
+                endDate.setDate(endDate.getDate() + 5);
+                if (endDate.getMonth() > monthNum - 1) {
+                    endDate.setDate(endDate.getDate() - 1);
+                }
+                weeks.push({
+                    id: generateId(),
+                    startDate: formatDate(startDate),
+                    endDate: formatDate(endDate),
+                    theme: `Неделя ${weeks.length + 1}`
+                });
+                currentDate.setDate(currentDate.getDate() + 7);
+                if (currentDate.getMonth() > monthNum - 1) break;
+            }
+            if (weeks.length > 0) {
+                const nonOverlapping = weeks.filter(w => {
+                    return !state.weeks.some(existing => {
+                        const existingStart = new Date(existing.startDate);
+                        const existingEnd = new Date(existing.endDate);
+                        const newStart = new Date(w.startDate);
+                        const newEnd = new Date(w.endDate);
+                        return (existingStart <= newStart && newStart <= existingEnd) ||
+                               (existingStart <= newEnd && newEnd <= existingEnd);
+                    });
+                });
+                state.weeks = [...state.weeks, ...nonOverlapping];
+                state.weeks.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+                pushHistory();
+                renderCurrentView();
+                showToast(`Добавлено ${nonOverlapping.length} недель`, 'success');
+            } else {
+                showToast('Не удалось сгенерировать недели', 'error');
+            }
+        }
+
+        // ============================================
+        // Темная тема
+        // ============================================
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            const icon = document.getElementById('icon-theme');
+            icon.innerHTML = newTheme === 'dark' ? 
+                `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>` :
+                ICONS.theme;
+        }
+
+        // ============================================
+        // Управление вкладками
+        // ============================================
+        function setTab(tabName) {
+            activeTab = tabName;
+            const tabs = ['manage', 'status', 'calendar', 'official', 'progress'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tabName) {
+                    btn.className = "px-3 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap transition-colors text-blue-600 bg-blue-50 font-semibold";
+                } else {
+                    btn.className = "px-3 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap transition-colors text-slate-600 hover:bg-slate-100";
+                }
+                const view = document.getElementById(`view-${t}`);
+                if (view) {
+                    view.classList.toggle('hidden', t !== tabName);
+                }
+            });
+            renderCurrentView();
+        }
+
+        // ============================================
+        // Поиск и фильтрация
+        // ============================================
+        function setupSearchFilter() {
+            const searchInput = document.getElementById('search-input');
+            const filterSelect = document.getElementById('filter-type');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    searchTerm = e.target.value.toLowerCase();
+                    renderManage();
+                });
+            }
+            if (filterSelect) {
+                filterSelect.addEventListener('change', (e) => {
+                    filterType = e.target.value;
+                    renderManage();
+                });
+            }
+        }
+
+        // ============================================
+        // Рендеринг Календаря
+        // ============================================
+        function renderCalendar() {
+            const container = document.getElementById('calendar-content');
+            
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                               'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            
+            // Навигация
+            let html = `
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm card p-4">
+                    <div class="flex items-center justify-between mb-6">
+                        <button onclick="changeCalendarMonth(-1)" class="p-2 rounded-lg hover:bg-slate-100 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <h2 class="text-xl font-bold text-slate-800">${monthNames[currentCalendarMonth]} ${currentCalendarYear}</h2>
+                        <button onclick="changeCalendarMonth(1)" class="p-2 rounded-lg hover:bg-slate-100 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Легенда -->
+                    <div class="flex flex-wrap gap-4 mb-4 p-3 bg-slate-50 rounded-lg">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: rgba(59, 130, 246, 0.3);"></div>
+                            <span>Есть мероприятие</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: rgba(16, 185, 129, 0.3);"></div>
+                            <span>Выполнено</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: rgba(251, 191, 36, 0.3); border: 2px dashed #fbbf24;"></div>
+                            <span>Каникулы</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="border: 2px solid #3b82f6;"></div>
+                            <span>Сегодня</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Сетка дней -->
+                    <div class="grid grid-cols-7 gap-1 text-center">
+            `;
+            
+            // Дни недели
+            const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            weekDays.forEach(day => {
+                html += `<div class="text-xs font-semibold text-slate-500 py-2">${day}</div>`;
+            });
+            
+            // Первый день месяца
+            const firstDay = new Date(currentCalendarYear, currentCalendarMonth, 1);
+            const lastDay = new Date(currentCalendarYear, currentCalendarMonth + 1, 0);
+            const startDayOfWeek = firstDay.getDay() || 7; // Понедельник = 1, Воскресенье = 7
+            
+            // Пустые ячейки до первого дня
+            for (let i = 1; i < startDayOfWeek; i++) {
+                html += `<div class="calendar-day other-month"></div>`;
+            }
+            
+            // Дни месяца
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dateStr = formatDate(new Date(currentCalendarYear, currentCalendarMonth, day));
+                const events = getEventsForDate(dateStr);
+                const isHolidayDay = isHoliday(dateStr);
+                const holidayName = getHolidayName(dateStr);
+                const isWeekendDay = isWeekend(dateStr);
+                const isTodayDay = isToday(dateStr);
+                const completedEvents = events.filter(e => e.completed);
+                const hasEvents = events.length > 0;
+                const allCompleted = hasEvents && events.length === completedEvents.length;
+                
+                let classes = 'calendar-day';
+                if (hasEvents) classes += ' has-event';
+                if (allCompleted && hasEvents) classes += ' completed';
+                if (isHolidayDay) classes += ' is-holiday';
+                if (isWeekendDay) classes += ' is-weekend';
+                if (isTodayDay) classes += ' is-today';
+                
+                html += `
+                    <div class="${classes}" onclick="showDayDetail('${dateStr}')" title="${formatDateFullRu(dateStr)}${isHolidayDay ? ' - ' + holidayName : ''}${hasEvents ? ' - ' + events.length + ' мероприятий' : ''}">
+                        <span class="day-number">${day}</span>
+                        ${isHolidayDay ? `<div style="position:absolute;top:2px;left:4px;font-size:10px;">🎉</div>` : ''}
+                        <div class="day-dots">
+                            ${events.slice(0, 4).map(e => `
+                                <div class="day-dot" style="background: ${getEventColor(e.type)};"></div>
+                            `).join('')}
+                            ${events.length > 4 ? `<span style="font-size:8px;color:#6b7280;">+${events.length - 4}</span>` : ''}
+                        </div>
+                        ${hasEvents ? `<div class="event-count">${events.length}</div>` : ''}
+                        ${isHolidayDay ? `<div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:7px;color:#f59e0b;white-space:nowrap;">${holidayName}</div>` : ''}
+                    </div>
+                `;
+            }
+            
+            html += `
+                    </div>
+                    
+                    <!-- Статистика месяца -->
+                    <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                        <div class="bg-slate-50 rounded-lg p-3">
+                            <div class="text-2xl font-bold text-blue-600">${state.events.filter(e => e.date.startsWith(`${currentCalendarYear}-${String(currentCalendarMonth+1).padStart(2, '0')}`)).length}</div>
+                            <div class="text-xs text-slate-500">Мероприятий</div>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-3">
+                            <div class="text-2xl font-bold text-emerald-600">${state.events.filter(e => e.date.startsWith(`${currentCalendarYear}-${String(currentCalendarMonth+1).padStart(2, '0')}`) && e.completed).length}</div>
+                            <div class="text-xs text-slate-500">Выполнено</div>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-3">
+                            <div class="text-2xl font-bold text-amber-600">${HOLIDAYS.filter(h => {
+                                const hStart = new Date(h.start);
+                                const hEnd = new Date(h.end);
+                                const monthStart = new Date(currentCalendarYear, currentCalendarMonth, 1);
+                                const monthEnd = new Date(currentCalendarYear, currentCalendarMonth + 1, 0);
+                                return hStart <= monthEnd && hEnd >= monthStart;
+                            }).length}</div>
+                            <div class="text-xs text-slate-500">Каникулярных периодов</div>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-3">
+                            <div class="text-2xl font-bold text-purple-600">${[...new Set(state.events.filter(e => e.date.startsWith(`${currentCalendarYear}-${String(currentCalendarMonth+1).padStart(2, '0')}`)).map(e => e.type))].length}</div>
+                            <div class="text-xs text-slate-500">Типов мероприятий</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // Смена месяца в календаре
+        // ============================================
+        function changeCalendarMonth(delta) {
+            currentCalendarMonth += delta;
+            if (currentCalendarMonth > 11) {
+                currentCalendarMonth = 0;
+                currentCalendarYear++;
+            } else if (currentCalendarMonth < 0) {
+                currentCalendarMonth = 11;
+                currentCalendarYear--;
+            }
+            renderCalendar();
+        }
+
+        // ============================================
+        // Детали дня
+        // ============================================
+        function showDayDetail(dateStr) {
+            const events = getEventsForDate(dateStr);
+            const isHolidayDay = isHoliday(dateStr);
+            const holidayName = getHolidayName(dateStr);
+            
+            document.getElementById('day-detail-title').textContent = 
+                `📅 ${formatDateFullRu(dateStr)}${isHolidayDay ? ` - ${holidayName}` : ''}`;
+            
+            const content = document.getElementById('day-detail-content');
+            
+            if (events.length === 0 && !isHolidayDay) {
+                content.innerHTML = `
+                    <div class="text-center py-8 text-slate-500">
+                        <p class="text-4xl mb-2">📭</p>
+                        <p>Нет мероприятий на этот день</p>
+                    </div>
+                `;
+            } else {
+                let html = '';
+                
+                // Каникулы
+                if (isHolidayDay) {
+                    html += `
+                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl">🎉</span>
+                                <div>
+                                    <div class="font-bold text-amber-700">${holidayName}</div>
+                                    <div class="text-xs text-amber-600">В этот день занятий нет</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Мероприятия
+                if (events.length > 0) {
+                    html += `<div class="space-y-2">`;
+                    events.forEach(ev => {
+                        html += `
+                            <div class="day-detail-event ${ev.completed ? 'completed' : ''}">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="font-semibold text-sm">${ev.topic}</div>
+                                        <div class="text-xs text-slate-500">${ev.responsible}</div>
+                                    </div>
+                                    <span class="event-type">${ev.type}</span>
+                                </div>
+                                <div class="text-xs text-slate-400 mt-1">${ev.direction}</div>
+                                ${ev.completed ? '<div class="text-xs text-emerald-600 mt-1">✅ Выполнено</div>' : ''}
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+                
+                content.innerHTML = html;
+            }
+            
+            document.getElementById('modal-day-detail').classList.remove('hidden');
+        }
+
+        function closeDayDetail() {
+            document.getElementById('modal-day-detail').classList.add('hidden');
+        }
+
+        // ============================================
+        // Рендеринг остальных вкладок
+        // ============================================
+        function renderManage() {
+            const container = document.getElementById('manage-content');
+            
+            let filteredEvents = state.events;
+            if (searchTerm) {
+                filteredEvents = filteredEvents.filter(e => 
+                    e.topic.toLowerCase().includes(searchTerm) ||
+                    e.responsible.toLowerCase().includes(searchTerm)
+                );
+            }
+            if (filterType) {
+                filteredEvents = filteredEvents.filter(e => e.type === filterType);
+            }
+            
+            if (state.weeks.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-xl border border-slate-200 border-dashed card">
+                        <p class="text-slate-500 mb-4">План пуст. Начните с добавления учебной недели.</p>
+                        <button onclick="openWeekModal()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium px-4 py-2 rounded-lg transition-all inline-flex items-center gap-2">
+                            ${ICONS.calendarPlus} Добавить неделю
+                        </button>
+                        <button onclick="generateMonthWeeks()" class="bg-purple-50 hover:bg-purple-100 text-purple-700 font-medium px-4 py-2 rounded-lg transition-all inline-flex items-center gap-2 ml-2">
+                            ${ICONS.gen} Сгенерировать месяц
+                        </button>
+                    </div>`;
+                return;
+            }
+
+            let html = '<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">';
+            state.weeks.forEach(week => {
+                const weekEvents = getEventsForWeek(week.id);
+                let filteredWeekEvents = weekEvents;
+                if (searchTerm) {
+                    filteredWeekEvents = filteredWeekEvents.filter(e => 
+                        e.topic.toLowerCase().includes(searchTerm) ||
+                        e.responsible.toLowerCase().includes(searchTerm)
+                    );
+                }
+                if (filterType) {
+                    filteredWeekEvents = filteredWeekEvents.filter(e => e.type === filterType);
+                }
+                
+                const isFirst = isFirstWeekOfMonth(week, state.weeks);
+                const weekProgress = weekEvents.length ? 
+                    Math.round((weekEvents.filter(e => e.completed).length / weekEvents.length) * 100) : 0;
+                
+                let eventsHtml = '';
+                if (filteredWeekEvents.length === 0) {
+                    eventsHtml = '<p class="text-xs text-slate-400 italic text-center py-4">Нет запланированных мероприятий</p>';
+                } else {
+                    eventsHtml = '<div class="space-y-3">';
+                    filteredWeekEvents.forEach(ev => {
+                        const isCompleted = ev.completed;
+                        eventsHtml += `
+                            <div class="group flex justify-between items-start text-xs p-2 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors ${isCompleted ? 'bg-emerald-50 border-emerald-200' : ''}" 
+                                 data-event-id="${ev.id}" draggable="true"
+                                 oncontextmenu="showContextMenu(event, '${ev.id}')">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-slate-800 mb-0.5 flex items-center gap-1.5">
+                                        ${isCompleted ? '<span class="text-emerald-500">✅</span>' : ''}
+                                        ${ev.type !== SPECIAL_TYPES.NONE ? `<span class="text-blue-600 mr-1">[${ev.type}]</span>` : ''}
+                                        «${ev.topic}»
+                                    </div>
+                                    <div class="text-slate-500 flex flex-wrap gap-2 items-center">
+                                        <span class="flex items-center gap-1">${ICONS.info} ${formatDateRu(ev.date)}</span>
+                                        <span>• ${ev.responsible}</span>
+                                        ${isCompleted ? '<span class="text-emerald-600 text-[10px] font-medium">✓ Выполнено</span>' : ''}
+                                    </div>
+                                    <div class="text-slate-400 mt-0.5 line-clamp-1">${ev.direction}</div>
+                                </div>
+                                <div class="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-all ml-2">
+                                    <button onclick="toggleComplete('${ev.id}')" class="p-1.5 text-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all" title="Отметить выполненным">
+                                        ${ICONS.check}
+                                    </button>
+                                    <button onclick="editEvent('${ev.id}')" class="p-1.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all" title="Редактировать">
+                                        ${ICONS.edit}
+                                    </button>
+                                    <button onclick="deleteEvent('${ev.id}')" class="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all" title="Удалить">
+                                        ${ICONS.trash}
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    eventsHtml += '</div>';
+                }
+
+                html += `
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col card week-block" data-week-id="${week.id}">
+                        <div class="bg-slate-50 border-b border-slate-200 px-4 py-3 flex justify-between items-start gap-4">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                    <span class="px-2 py-0.5 bg-slate-200 text-slate-700 rounded-md text-[11px] font-bold tracking-wide">
+                                        ${formatDateRu(week.startDate)} - ${formatDateRu(week.endDate)}
+                                    </span>
+                                    ${isFirst ? '<span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-md text-[11px] font-bold">1-я неделя месяца</span>' : ''}
+                                    <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-md text-[11px] font-bold">
+                                        ${weekEvents.length} мероприятий
+                                    </span>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-sm leading-tight">${week.theme}</h3>
+                            </div>
+                            <div class="flex gap-1 shrink-0">
+                                <button onclick="editWeek('${week.id}')" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Редактировать">
+                                    ${ICONS.edit}
+                                </button>
+                                <button onclick="deleteWeek('${week.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Удалить">
+                                    ${ICONS.trash}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-4 flex-1 drop-zone" data-week-id="${week.id}" 
+                             ondragover="event.preventDefault(); this.classList.add('drag-over')"
+                             ondrop="handleDrop(event, '${week.id}')"
+                             ondragleave="this.classList.remove('drag-over')">
+                            ${eventsHtml}
+                        </div>
+                        <div class="bg-slate-50 border-t border-slate-100 p-3">
+                            <div class="flex items-center gap-3">
+                                <div class="flex-1">
+                                    <div class="w-full bg-slate-200 rounded-full h-1.5">
+                                        <div class="bg-blue-600 h-1.5 rounded-full transition-all duration-500 progress-bar" 
+                                             style="width: ${weekProgress}%"></div>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-medium text-slate-500">${weekProgress}%</span>
+                            </div>
+                            <button onclick="openEventModal('${week.id}')" class="w-full mt-2 text-xs font-medium text-slate-600 hover:text-blue-600 bg-white border border-slate-200 hover:border-blue-300 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+                                ${ICONS.eventPlus} Добавить мероприятие
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+            initDragDrop();
+        }
+
+        function renderStatus() {
+            const container = document.getElementById('status-content');
+            
+            let monthsSet = new Set();
+            state.weeks.forEach(w => {
+                monthsSet.add(getMonthString(w.startDate));
+                monthsSet.add(getMonthString(w.endDate));
+            });
+
+            const reportMonths = {};
+            Array.from(monthsSet).forEach(month => {
+                if (!month) return;
+                const monthEvents = state.events.filter(e => getMonthString(e.date) === month);
+                reportMonths[month] = {
+                    hasPDD: monthEvents.some(e => e.type === SPECIAL_TYPES.PDD),
+                    hasSHAG: monthEvents.some(e => e.type === SPECIAL_TYPES.SHAG && isLastThursday(e.date)),
+                    hasPsycho: monthEvents.some(e => e.type === SPECIAL_TYPES.PSYCHO),
+                    hasFamily: monthEvents.some(e => e.type === SPECIAL_TYPES.FAMILY),
+                    hasGenocide: monthEvents.some(e => e.type === SPECIAL_TYPES.GENOCIDE),
+                };
+            });
+
+            if (Object.keys(reportMonths).length === 0) {
+                container.innerHTML = `<p class="text-sm text-slate-500 text-center py-8">Добавьте недели для анализа данных.</p>`;
+                return;
+            }
+
+            let html = '<div class="space-y-8">';
+            
+            html += `<div><h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">📋 Требования на месяц</h2><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
+            for (const [month, report] of Object.entries(reportMonths)) {
+                html += `
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm card">
+                        <h3 class="font-bold text-slate-700 capitalize text-sm mb-4 border-b border-slate-100 pb-2">${getFullMonthName(month) || month}</h3>
+                        <div class="flex flex-col gap-2.5">
+                            ${getValidationBadge(report.hasPDD, "Занятие по ПДД")}
+                            ${getValidationBadge(report.hasSHAG, "ШАГ (последний четверг)")}
+                            ${getValidationBadge(report.hasPsycho, "Моё психол. благополучие")}
+                            ${getValidationBadge(report.hasFamily, "Я. Моя Семья. Моя Родина")}
+                            ${getValidationBadge(report.hasGenocide, "Инфо. час (Геноцид)")}
+                        </div>
+                    </div>
+                `;
+            }
+            html += `</div></div>`;
+
+            html += `<div><h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">📅 Требования на неделю</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            state.weeks.forEach(week => {
+                const weekEvents = getEventsForWeek(week.id);
+                const isFirst = isFirstWeekOfMonth(week, state.weeks);
+                
+                const report = {
+                    count: weekEvents.length,
+                    isExactlyFive: weekEvents.length === 5,
+                    hasClassHour: weekEvents.some(e => e.type === SPECIAL_TYPES.CLASS_HOUR),
+                    hasInfoHour: weekEvents.some(e => e.type === SPECIAL_TYPES.INFO_HOUR || e.type === SPECIAL_TYPES.GENOCIDE),
+                    hasSHPP: isFirst ? weekEvents.some(e => e.type === SPECIAL_TYPES.SHPP) : true,
+                };
+
+                html += `
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-4 items-start card">
+                        <div class="w-full sm:w-1/3 shrink-0">
+                            <p class="text-xs font-bold text-slate-500 bg-slate-100 inline-block px-2 py-1 rounded mb-1">${formatDateRu(week.startDate)} - ${formatDateRu(week.endDate)}</p>
+                            <p class="text-xs font-medium text-slate-700 line-clamp-2" title="${week.theme}">${week.theme}</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2 flex-1">
+                            ${getValidationBadge(report.isExactlyFive, `5 мероприятий (сейчас ${report.count})`)}
+                            ${getValidationBadge(report.hasClassHour, "Классный час")}
+                            ${getValidationBadge(report.hasInfoHour, "Инфо. час")}
+                            ${isFirst ? getValidationBadge(report.hasSHPP, "ШПП (1-я неделя)") : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div></div></div>`;
+
+            container.innerHTML = html;
+        }
+
+        function renderOfficial() {
+            const thead = document.getElementById('official-table-head');
+            const tbody = document.getElementById('official-table-body');
+            
+            let headHtml = `<tr><th class="border border-slate-800 p-2 w-[8%]">Неделя, месяц</th>`;
+            DIRECTIONS.forEach(dir => {
+                headHtml += `<th class="border border-slate-800 p-2 w-[11.5%] text-[9px]">${dir}</th>`;
+            });
+            headHtml += `</tr>`;
+            thead.innerHTML = headHtml;
+
+            let bodyHtml = '';
+            if (state.weeks.length === 0) {
+                bodyHtml = `<tr><td colspan="9" class="border border-slate-800 p-8 text-slate-400 italic">План пуст. Добавьте данные через раздел "Управление планом".</td></tr>`;
+            } else {
+                state.weeks.forEach(week => {
+                    const weekEvents = getEventsForWeek(week.id);
+                    const weekLabel = `${formatDateRu(week.startDate)}-${formatDateRu(week.endDate)}`;
+                    
+                    bodyHtml += `
+                        <tr class="bg-slate-50 print:bg-transparent">
+                            <td class="border border-slate-800 p-1 font-bold whitespace-nowrap">${weekLabel}</td>
+                            <td colspan="8" class="border border-slate-800 p-1 text-left font-bold pl-3 uppercase">${week.theme}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-800 p-1"></td>
+                    `;
+                    
+                    DIRECTIONS.forEach(dir => {
+                        const cellEvents = weekEvents.filter(e => e.direction === dir);
+                        bodyHtml += `<td class="border border-slate-800 p-1.5 text-left align-top text-[10px]">`;
+                        cellEvents.forEach(ev => {
+                            const label = ev.type !== SPECIAL_TYPES.NONE ? ev.type : 'Мероприятие';
+                            bodyHtml += `
+                                <div class="mb-2 pb-2 border-b border-slate-300 last:border-0 last:mb-0 last:pb-0">
+                                    <span class="font-semibold block">${label}:</span>
+                                    <span>«${ev.topic}»</span><br/>
+                                    <span class="text-slate-700 italic">${formatDateRu(ev.date)}</span><br/>
+                                    <span>${ev.responsible}</span>
+                                    ${ev.completed ? '<br/><span class="text-emerald-600">✓ Выполнено</span>' : ''}
+                                </div>
+                            `;
+                        });
+                        bodyHtml += `</td>`;
+                    });
+                    bodyHtml += `</tr>`;
+                });
+            }
+            tbody.innerHTML = bodyHtml;
+        }
+
+        function renderProgress() {
+            const container = document.getElementById('progress-content');
+            
+            const total = state.events.length;
+            const completed = getCompletedEvents().length;
+            const percentage = getProgress();
+            
+            const directionStats = {};
+            DIRECTIONS.forEach(dir => {
+                const dirEvents = state.events.filter(e => e.direction === dir);
+                const dirCompleted = dirEvents.filter(e => e.completed).length;
+                directionStats[dir] = {
+                    total: dirEvents.length,
+                    completed: dirCompleted,
+                    percentage: dirEvents.length ? Math.round((dirCompleted / dirEvents.length) * 100) : 0
+                };
+            });
+            
+            const typeStats = {};
+            Object.values(SPECIAL_TYPES).forEach(type => {
+                const typeEvents = state.events.filter(e => e.type === type);
+                const typeCompleted = typeEvents.filter(e => e.completed).length;
+                typeStats[type] = {
+                    total: typeEvents.length,
+                    completed: typeCompleted,
+                    percentage: typeEvents.length ? Math.round((typeCompleted / typeEvents.length) * 100) : 0
+                };
+            });
+            
+            let html = `
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm card p-6">
+                        <h2 class="text-base font-bold text-slate-800 mb-4">📊 Общий прогресс выполнения плана</h2>
+                        <div class="flex items-center gap-6">
+                            <div class="relative w-24 h-24">
+                                <svg class="w-24 h-24 transform -rotate-90">
+                                    <circle cx="48" cy="48" r="40" fill="none" stroke="#e2e8f0" stroke-width="8"/>
+                                    <circle cx="48" cy="48" r="40" fill="none" stroke="#3b82f6" stroke-width="8"
+                                            stroke-dasharray="${2 * Math.PI * 40 * percentage / 100} ${2 * Math.PI * 40}"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-2xl font-bold text-slate-800">${percentage}%</span>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-slate-500">Всего мероприятий:</span>
+                                        <span class="font-bold text-slate-800 block">${total}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Выполнено:</span>
+                                        <span class="font-bold text-emerald-600 block">${completed}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Осталось:</span>
+                                        <span class="font-bold text-rose-600 block">${total - completed}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Статус:</span>
+                                        <span class="font-bold block ${percentage === 100 ? 'text-emerald-600' : percentage > 50 ? 'text-blue-600' : 'text-amber-600'}">
+                                            ${percentage === 100 ? '✅ Завершено' : percentage > 50 ? '🔄 В процессе' : '⏳ Начато'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm card p-6">
+                        <h3 class="font-bold text-slate-800 mb-4">📌 По направлениям</h3>
+                        <div class="space-y-3">
+            `;
+            
+            for (const [dir, stats] of Object.entries(directionStats)) {
+                if (stats.total === 0) continue;
+                html += `
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-700">${dir}</span>
+                            <span class="text-slate-500">${stats.completed}/${stats.total} (${stats.percentage}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" 
+                                 style="width: ${stats.percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += `
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm card p-6">
+                        <h3 class="font-bold text-slate-800 mb-4">🏷️ По типам мероприятий</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+            `;
+            
+            for (const [type, stats] of Object.entries(typeStats)) {
+                if (stats.total === 0) continue;
+                const color = stats.percentage === 100 ? 'emerald' : stats.percentage > 50 ? 'blue' : 'amber';
+                html += `
+                    <div class="border border-slate-200 rounded-lg p-3 text-center">
+                        <div class="text-xs font-medium text-slate-600">${type}</div>
+                        <div class="text-lg font-bold text-slate-800">${stats.completed}/${stats.total}</div>
+                        <div class="w-full bg-slate-200 rounded-full h-1.5 mt-1">
+                            <div class="bg-${color}-600 h-1.5 rounded-full transition-all duration-500" 
+                                 style="width: ${stats.percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += `
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        function getValidationBadge(isValid, text) {
+            const bg = isValid ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700';
+            const iconColor = isValid ? 'text-emerald-500' : 'text-rose-500';
+            const icon = isValid ? ICONS.check : ICONS.alert;
+            return `
+                <div class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border ${bg}">
+                    <span class="${iconColor}">${icon}</span> 
+                    <span class="font-semibold whitespace-nowrap">${text}</span>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // Drag & Drop
+        // ============================================
+        function initDragDrop() {
+            const draggables = document.querySelectorAll('[draggable="true"]');
+            draggables.forEach(el => {
+                el.addEventListener('dragstart', handleDragStart);
+                el.addEventListener('dragend', handleDragEnd);
+            });
+        }
+
+        function handleDragStart(e) {
+            const eventId = e.target.dataset.eventId;
+            if (eventId) {
+                e.dataTransfer.setData('text/plain', eventId);
+                e.target.classList.add('dragging');
+            }
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            document.querySelectorAll('.drop-zone').forEach(el => {
+                el.classList.remove('drag-over');
+            });
+        }
+
+        function handleDrop(e, weekId) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            const eventId = e.dataTransfer.getData('text/plain');
+            if (eventId) {
+                moveEventToWeek(eventId, weekId);
+            }
+        }
+
+        function moveEventToWeek(eventId, newWeekId) {
+            const event = state.events.find(e => e.id === eventId);
+            if (event && event.weekId !== newWeekId) {
+                if (!getWeekById(newWeekId)) {
+                    showToast('Неделя не найдена', 'error');
+                    return;
+                }
+                event.weekId = newWeekId;
+                const week = getWeekById(newWeekId);
+                if (week) {
+                    event.date = week.startDate;
+                }
+                pushHistory();
+                renderManage();
+                showToast('Мероприятие перемещено', 'info');
+            }
+        }
+
+        // ============================================
+        // Контекстное меню
+        // ============================================
+        function showContextMenu(e, eventId) {
+            e.preventDefault();
+            contextTarget = eventId;
+            const menu = document.getElementById('context-menu');
+            menu.style.left = e.clientX + 'px';
+            menu.style.top = e.clientY + 'px';
+            menu.classList.remove('hidden');
+            document.addEventListener('click', closeContextMenu, { once: true });
+        }
+
+        function closeContextMenu() {
+            document.getElementById('context-menu').classList.add('hidden');
+        }
+
+        function contextMenuAction(action) {
+            if (!contextTarget) return;
+            switch (action) {
+                case 'complete': toggleComplete(contextTarget); break;
+                case 'edit': editEvent(contextTarget); break;
+                case 'delete': deleteEvent(contextTarget); break;
+            }
+            closeContextMenu();
+        }
+
+        // ============================================
+        // Управление неделями
+        // ============================================
+        function openWeekModal() {
+            document.getElementById('week-modal-title').innerHTML = `${ICONS.calendarPlus} Новая учебная неделя`;
+            document.getElementById('week-id').value = '';
+            document.getElementById('week-errors').classList.add('hidden');
+            
+            let defaultStart = '2026-09-01';
+            let defaultEnd = '2026-09-05';
+            
+            if (state.weeks.length > 0) {
+                const latestEnd = state.weeks.reduce((max, w) => w.endDate > max ? w.endDate : max, '2020-01-01');
+                let nextDate = new Date(latestEnd);
+                nextDate.setDate(nextDate.getDate() + 1);
+                while (nextDate.getDay() === 0) {
+                    nextDate.setDate(nextDate.getDate() + 1);
+                }
+                defaultStart = formatDate(nextDate);
+                let endDate = new Date(nextDate);
+                endDate.setDate(endDate.getDate() + 5);
+                if (endDate.getDay() === 0) {
+                    endDate.setDate(endDate.getDate() - 1);
+                }
+                defaultEnd = formatDate(endDate);
+            }
+            
+            document.getElementById('week-start').value = defaultStart;
+            document.getElementById('week-end').value = defaultEnd;
+            document.getElementById('week-theme').value = '';
+            document.getElementById('modal-week').classList.remove('hidden');
+        }
+
+        function editWeek(id) {
+            const week = getWeekById(id);
+            if (!week) return;
+            document.getElementById('week-modal-title').innerHTML = `${ICONS.calendarPlus} Редактировать неделю`;
+            document.getElementById('week-id').value = week.id;
+            document.getElementById('week-start').value = week.startDate;
+            document.getElementById('week-end').value = week.endDate;
+            document.getElementById('week-theme').value = week.theme;
+            document.getElementById('week-errors').classList.add('hidden');
+            document.getElementById('modal-week').classList.remove('hidden');
+        }
+
+        function closeWeekModal() {
+            document.getElementById('modal-week').classList.add('hidden');
+        }
+
+        function saveWeek(e) {
+            e.preventDefault();
+            try {
+                const id = document.getElementById('week-id').value;
+                const weekData = {
+                    id: id || generateId(),
+                    startDate: document.getElementById('week-start').value,
+                    endDate: document.getElementById('week-end').value,
+                    theme: sanitizeInput(document.getElementById('week-theme').value)
+                };
+                
+                const errors = validateWeek(weekData);
+                if (errors.length > 0) {
+                    const errorContainer = document.getElementById('week-errors');
+                    errorContainer.textContent = '• ' + errors.join('\n• ');
+                    errorContainer.classList.remove('hidden');
+                    return;
+                }
+                
+                if (id) {
+                    const index = state.weeks.findIndex(w => w.id === id);
+                    if (index > -1) {
+                        state.weeks[index] = { ...state.weeks[index], ...weekData };
+                    }
+                } else {
+                    state.weeks.push(weekData);
+                }
+                
+                state.weeks.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+                pushHistory();
+                closeWeekModal();
+                renderCurrentView();
+                showToast(id ? 'Неделя обновлена' : 'Неделя добавлена', 'success');
+            } catch (error) {
+                handleError(error, 'saveWeek');
+            }
+        }
+
+        function deleteWeek(id) {
+            try {
+                const week = getWeekById(id);
+                if (!week) return;
+                const events = getEventsForWeek(id);
+                if (events.length > 0) {
+                    if (!confirm(`Удалить неделю "${week.theme}" и все ${events.length} мероприятий?`)) {
+                        return;
+                    }
+                } else {
+                    if (!confirm(`Удалить неделю "${week.theme}"?`)) {
+                        return;
+                    }
+                }
+                state.weeks = state.weeks.filter(w => w.id !== id);
+                state.events = state.events.filter(e => e.weekId !== id);
+                pushHistory();
+                renderCurrentView();
+                showToast('Неделя удалена', 'info');
+            } catch (error) {
+                handleError(error, 'deleteWeek');
+            }
+        }
+
+        // ============================================
+        // Управление мероприятиями
+        // ============================================
+        function openEventModal(weekId = '') {
+            updateWeekDropdown();
+            document.getElementById('event-id').value = '';
+            document.getElementById('event-week').value = weekId;
+            document.getElementById('event-date').value = '';
+            document.getElementById('event-type').value = SPECIAL_TYPES.NONE;
+            document.getElementById('event-direction').value = DIRECTIONS[0];
+            document.getElementById('event-topic').value = '';
+            document.getElementById('event-responsible').value = '';
+            document.getElementById('event-completed').checked = false;
+            document.getElementById('event-errors').classList.add('hidden');
+            
+            if (weekId) {
+                const week = getWeekById(weekId);
+                if (week) {
+                    document.getElementById('event-date').value = week.startDate;
+                }
+            }
+            
+            document.getElementById('modal-event').querySelector('h3').innerHTML = 'Добавить мероприятие';
+            document.getElementById('event-submit-btn').textContent = 'Добавить мероприятие';
+            document.getElementById('modal-event').classList.remove('hidden');
+        }
+
+        function editEvent(id) {
+            const ev = state.events.find(e => e.id === id);
+            if (!ev) return;
+            updateWeekDropdown();
+            document.getElementById('event-id').value = ev.id;
+            document.getElementById('event-week').value = ev.weekId;
+            document.getElementById('event-date').value = ev.date;
+            document.getElementById('event-type').value = ev.type;
+            document.getElementById('event-direction').value = ev.direction;
+            document.getElementById('event-topic').value = ev.topic;
+            document.getElementById('event-responsible').value = ev.responsible;
+            document.getElementById('event-completed').checked = ev.completed || false;
+            document.getElementById('event-errors').classList.add('hidden');
+            document.getElementById('modal-event').querySelector('h3').innerHTML = 'Редактировать мероприятие';
+            document.getElementById('event-submit-btn').textContent = 'Сохранить изменения';
+            document.getElementById('modal-event').classList.remove('hidden');
+        }
+
+        function closeEventModal() {
+            document.getElementById('modal-event').classList.add('hidden');
+        }
+
+        function saveEvent(e) {
+            e.preventDefault();
+            try {
+                const eventId = document.getElementById('event-id').value;
+                const eventData = {
+                    id: eventId || generateId(),
+                    weekId: document.getElementById('event-week').value,
+                    date: document.getElementById('event-date').value,
+                    type: document.getElementById('event-type').value,
+                    direction: document.getElementById('event-direction').value,
+                    topic: sanitizeInput(document.getElementById('event-topic').value),
+                    responsible: sanitizeInput(document.getElementById('event-responsible').value),
+                    completed: document.getElementById('event-completed').checked
+                };
+                
+                const errors = validateEvent(eventData);
+                if (errors.length > 0) {
+                    const errorContainer = document.getElementById('event-errors');
+                    errorContainer.textContent = '• ' + errors.join('\n• ');
+                    errorContainer.classList.remove('hidden');
+                    return;
+                }
+                
+                if (!getWeekById(eventData.weekId)) {
+                    showToast('Выбранная неделя не существует', 'error');
+                    return;
+                }
+                
+                if (eventId) {
+                    const index = state.events.findIndex(ev => ev.id === eventId);
+                    if (index > -1) {
+                        state.events[index] = { ...state.events[index], ...eventData };
+                    }
+                } else {
+                    state.events.push(eventData);
+                }
+                
+                pushHistory();
+                
+                if (!eventId) {
+                    document.getElementById('event-topic').value = '';
+                    document.getElementById('event-type').value = SPECIAL_TYPES.NONE;
+                    document.getElementById('event-responsible').value = '';
+                    document.getElementById('event-completed').checked = false;
+                } else {
+                    closeEventModal();
+                }
+                
+                renderCurrentView();
+                showToast(eventId ? 'Мероприятие обновлено' : 'Мероприятие успешно добавлено', 'success');
+            } catch (error) {
+                handleError(error, 'saveEvent');
+            }
+        }
+
+        function deleteEvent(id) {
+            try {
+                const event = state.events.find(e => e.id === id);
+                if (!event) return;
+                if (!confirm(`Удалить мероприятие "${event.topic}"?`)) {
+                    return;
+                }
+                state.events = state.events.filter(e => e.id !== id);
+                pushHistory();
+                renderCurrentView();
+                showToast('Мероприятие удалено', 'info');
+            } catch (error) {
+                handleError(error, 'deleteEvent');
+            }
+        }
+
+        function toggleComplete(id) {
+            const event = state.events.find(e => e.id === id);
+            if (event) {
+                event.completed = !event.completed;
+                pushHistory();
+                renderCurrentView();
+                showToast(event.completed ? 'Мероприятие выполнено ✅' : 'Статус снят', 'info');
+            }
+        }
+
+        function updateWeekDropdown() {
+            const weekSelect = document.getElementById('event-week');
+            weekSelect.innerHTML = '<option value="">-- Не выбрана --</option>';
+            state.weeks.forEach(w => {
+                const opt = document.createElement('option');
+                opt.value = w.id;
+                opt.textContent = `${formatDateRu(w.startDate)} — ${formatDateRu(w.endDate)} (${w.theme.substring(0, 40)}${w.theme.length > 40 ? '...' : ''})`;
+                weekSelect.appendChild(opt);
+            });
+        }
+
+        // ============================================
+        // Импорт/Экспорт модалка
+        // ============================================
+        function showImportExport() {
+            const backups = getBackups();
+            const list = document.getElementById('backup-list');
+            
+            if (backups.length === 0) {
+                list.innerHTML = '<p class="text-xs text-slate-400">Нет резервных копий</p>';
+            } else {
+                list.innerHTML = backups.slice(-5).reverse().map(b => `
+                    <button onclick="restoreBackup('${b.timestamp}')" 
+                            class="w-full text-left text-xs px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors flex justify-between items-center border border-slate-100">
+                        <span>${new Date(b.timestamp).toLocaleString()}</span>
+                        <span class="text-blue-600">Восстановить</span>
+                    </button>
+                `).join('');
+            }
+            
+            document.getElementById('modal-import-export').classList.remove('hidden');
+        }
+
+        function closeImportExport() {
+            document.getElementById('modal-import-export').classList.add('hidden');
+        }
+
+        // ============================================
+        // Печать
+        // ============================================
+        function printDocument() {
+            setTab('official');
+            setTimeout(() => {
+                window.print();
+            }, 300);
+        }
+
+        // ============================================
+        // Рендеринг текущей вкладки
+        // ============================================
+        function renderCurrentView() {
+            if (activeTab === 'manage') renderManage();
+            else if (activeTab === 'status') renderStatus();
+            else if (activeTab === 'calendar') renderCalendar();
+            else if (activeTab === 'official') renderOfficial();
+            else if (activeTab === 'progress') renderProgress();
+            historyManager.updateButtons();
+        }
+
+        // ============================================
+        // Инициализация
+        // ============================================
+        function initDropdowns() {
+            const typeSelect = document.getElementById('event-type');
+            Object.values(SPECIAL_TYPES).forEach(val => {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = val;
+                typeSelect.appendChild(opt);
+            });
+            
+            const filterSelect = document.getElementById('filter-type');
+            Object.values(SPECIAL_TYPES).forEach(val => {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = val;
+                filterSelect.appendChild(opt);
+            });
+
+            const dirSelect = document.getElementById('event-direction');
+            DIRECTIONS.forEach(val => {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = val;
+                dirSelect.appendChild(opt);
+            });
+        }
+
+        // ============================================
+        // Клавиатурные сокращения
+        // ============================================
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'n') {
+                e.preventDefault();
+                openWeekModal();
+            }
+            if (e.ctrlKey && e.key === 'e') {
+                e.preventDefault();
+                openEventModal();
+            }
+            if (e.key === 'Escape') {
+                closeWeekModal();
+                closeEventModal();
+                closeImportExport();
+                closeContextMenu();
+                closeDayDetail();
+            }
+            if (e.ctrlKey && e.key === 'p') {
+                if (activeTab !== 'official') {
+                    e.preventDefault();
+                    printDocument();
+                }
+            }
+            if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                undoAction();
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'Z') {
+                e.preventDefault();
+                redoAction();
+            }
+        });
+
+        // ============================================
+        // Загрузка приложения
+        // ============================================
+        window.onload = () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                if (savedTheme === 'dark') {
+                    document.getElementById('icon-theme').innerHTML = 
+                        `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+                }
+            }
+            
+            const loaded = loadState();
+            initDropdowns();
+            setupSearchFilter();
+            
+            if (!loaded || state.weeks.length === 0) {
+                const exampleWeek = {
+                    id: generateId(),
+                    startDate: '2026-09-01',
+                    endDate: '2026-09-05',
+                    theme: 'Неделя правовых знаний «Знай и соблюдай законы своей страны»'
+                };
+                state.weeks.push(exampleWeek);
+                pushHistory();
+            }
+            
+            // Устанавливаем текущий месяц для календаря
+            const today = new Date();
+            currentCalendarMonth = today.getMonth();
+            currentCalendarYear = today.getFullYear();
+            
+            renderCurrentView();
+            
+            setInterval(() => {
+                saveState();
+                autoBackup();
+            }, 30000);
+            
+            checkUpcomingEvents();
+            setInterval(checkUpcomingEvents, 86400000);
+            
+            console.log('📚 План воспитательной работы загружен');
+            console.log(`📊 Недель: ${state.weeks.length}, Мероприятий: ${state.events.length}`);
+            console.log(`🎉 Каникулы: ${HOLIDAYS.length} периодов`);
+        };
+
+        // ============================================
+        // Уведомления о предстоящих мероприятиях
+        // ============================================
+        function checkUpcomingEvents() {
+            const today = new Date();
+            const threeDaysLater = new Date();
+            threeDaysLater.setDate(today.getDate() + 3);
+            
+            const upcoming = state.events.filter(ev => {
+                const eventDate = new Date(ev.date);
+                return eventDate >= today && eventDate <= threeDaysLater && !ev.completed;
+            });
+            
+            if (upcoming.length > 0) {
+                const count = upcoming.length;
+                const first = upcoming[0];
+                const message = count === 1 ? 
+                    `Скоро: "${first.topic}" (${formatDateRu(first.date)})` :
+                    `Скоро ${count} мероприятий. Ближайшее: "${first.topic}" (${formatDateRu(first.date)})`;
+                showToast(message, 'info');
+            }
+        }
+
+        // ============================================
+        // Touch support для Drag & Drop
+        // ============================================
+        let touchStartX, touchStartY, touchEventId;
+
+        document.addEventListener('touchstart', (e) => {
+            const target = e.target.closest('[data-event-id]');
+            if (target) {
+                touchEventId = target.dataset.eventId;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            if (touchEventId) {
+                const touch = e.touches[0];
+                const dx = touch.clientX - touchStartX;
+                const dy = touch.clientY - touchStartY;
+                if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+                    e.preventDefault();
+                }
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchend', (e) => {
+            if (touchEventId) {
+                const touch = e.changedTouches[0];
+                const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
+                const dropZone = elements.find(el => el.classList?.contains('drop-zone'));
+                if (dropZone && dropZone.dataset.weekId) {
+                    moveEventToWeek(touchEventId, dropZone.dataset.weekId);
+                }
+                touchEventId = null;
+            }
+        }, { passive: true });
+
+        console.log('✅ Все улучшения применены!');
+        console.log('🎯 Календарь с цветовым выделением мероприятий');
+        console.log('🎉 Добавлены каникулы:');
+        HOLIDAYS.forEach(h => {
+            console.log(`   - ${h.name}: ${h.start} - ${h.end}`);
+        });
+    </script>
+</body>
+</html>

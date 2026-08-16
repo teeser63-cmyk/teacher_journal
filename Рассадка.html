@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Интеллектуальный конструктор рассадки v3.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-color: rgba(0,0,0,0.1);
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --shadow-color: rgba(0,0,0,0.3);
+        }
+
+        * {
+            transition: background-color var(--transition-speed), 
+                        color var(--transition-speed),
+                        border-color var(--transition-speed),
+                        box-shadow var(--transition-speed);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .desk-card {
+            transition: all 0.2s ease-in-out;
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+
+        .desk-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-color);
+        }
+
+        .seat-slot {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 70px;
+            background: var(--bg-primary);
+            border-color: var(--border-color);
+        }
+
+        .seat-slot.occupied {
+            background: rgba(99, 102, 241, 0.08);
+            border-color: #818cf8;
+        }
+
+        .seat-slot.drag-over {
+            background: rgba(59, 130, 246, 0.15) !important;
+            border-color: #3b82f6 !important;
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+        }
+
+        .seat-slot.desk-hover {
+            background: rgba(16, 185, 129, 0.1) !important;
+            border-color: #10b981 !important;
+        }
+
+        .student-item {
+            cursor: grab;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .student-item:active {
+            cursor: grabbing;
+        }
+
+        .student-item.dragging {
+            opacity: 0.4;
+            transform: scale(0.95);
+        }
+
+        .student-item.special-vision {
+            border-left: 4px solid #f59e0b;
+        }
+        .student-item.special-hearing {
+            border-left: 4px solid #8b5cf6;
+        }
+        .student-item.special-hyperactive {
+            border-left: 4px solid #ef4444;
+        }
+        .student-item.special-multiple {
+            border-left: 4px solid #ec4899;
+        }
+
+        .filter-btn.active {
+            background: #818cf8 !important;
+            color: white !important;
+        }
+
+        .toast-enter {
+            animation: slideUp 0.3s ease-out forwards;
+        }
+
+        .toast-exit {
+            animation: slideDown 0.3s ease-in forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+        }
+
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .history-item {
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            margin-bottom: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            background: var(--bg-secondary);
+            transform: translateX(4px);
+        }
+
+        .modal-backdrop {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            .desk-card { break-inside: avoid; }
+            .seat-slot { min-height: 50px; }
+        }
+
+        .voice-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .voice-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .voice-btn.listening {
+            color: #ef4444;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" class="h-screen flex flex-col overflow-hidden">
+    
+    <!-- HEADER -->
+    <header class="bg-indigo-700 text-white px-6 py-3 shadow-lg z-20 flex-shrink-0 no-print">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-800 p-2 rounded-lg">
+                    <i class="fa-solid fa-graduation-cap text-2xl text-indigo-200"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold leading-tight">🚀 Рассадка v3.0</h1>
+                    <div class="flex items-center gap-3 text-xs text-indigo-200">
+                        <span><i class="fa-solid fa-chair"></i> <span id="occupied-count">0</span>/30 мест</span>
+                        <span>|</span>
+                        <span><i class="fa-solid fa-users"></i> <span id="total-students">0</span> учеников</span>
+                        <span>|</span>
+                        <span class="flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></span>
+                            <span id="save-status">Сохранено</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <button id="btn-theme-toggle" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-2 rounded-lg text-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-moon"></i>
+                    <span class="hidden sm:inline">Тема</span>
+                </button>
+                
+                <button id="btn-auto-seat" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold px-4 py-2 rounded-lg text-sm shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Авто-рассадка</span>
+                </button>
+                
+                <button id="btn-reset-seats" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm transition flex items-center gap-1">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span class="hidden sm:inline">Снять всех</span>
+                </button>
+                
+                <button id="btn-clear-all" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 rounded-lg text-sm transition flex items-center gap-1">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span class="hidden sm:inline">Очистить всё</span>
+                </button>
+
+                <button id="btn-export-pdf" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm transition flex items-center gap-1">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span class="hidden sm:inline">PDF</span>
+                </button>
+
+                <button id="btn-export-json" class="bg-slate-600 hover:bg-slate-700 text-white px-3 py-2 rounded-lg text-sm transition flex items-center gap-1">
+                    <i class="fa-solid fa-download"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden max-w-7xl w-full mx-auto p-4 gap-4">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-80 md:w-96 bg-[var(--bg-secondary)] rounded-xl shadow-sm border border-[var(--border-color)] flex flex-col overflow-hidden flex-shrink-0 no-print">
+            
+            <div class="p-4 border-b border-[var(--border-color)] flex justify-between items-center bg-[var(--bg-primary)]">
+                <h2 class="font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <i class="fa-solid fa-users text-indigo-600"></i>
+                    <span>Ученики</span>
+                    <span id="student-count-badge" class="bg-indigo-100 text-indigo-700 text-xs font-semibold px-2 py-0.5 rounded-full">0</span>
+                </h2>
+                <button id="btn-open-modal" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3 py-1.5 rounded-md transition flex items-center gap-1">
+                    <i class="fa-solid fa-plus"></i> Добавить
+                </button>
+            </div>
+
+            <!-- Quick Add + Voice -->
+            <div class="p-3 border-b border-[var(--border-color)] bg-[var(--bg-primary)]">
+                <form id="quick-add-form" class="flex gap-2">
+                    <input type="text" id="quick-name" placeholder="✏️ Быстрое добавление"
+                        class="flex-1 border border-[var(--border-color)] rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-[var(--bg-secondary)] text-[var(--text-primary)]">
+                    <button type="submit" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded-md text-sm transition">
+                        ОК
+                    </button>
+                    <button type="button" id="btn-voice-input" class="voice-btn text-slate-500 hover:text-indigo-600" title="Голосовой ввод">
+                        <i class="fa-solid fa-microphone text-lg"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Filters -->
+            <div class="p-3 border-b border-[var(--border-color)] bg-[var(--bg-primary)]">
+                <div class="flex flex-wrap gap-1">
+                    <button class="filter-btn px-2 py-1 rounded text-xs font-medium bg-[var(--bg-secondary)] border border-[var(--border-color)] hover:border-indigo-400 transition" data-filter="vision">
+                        <i class="fa-solid fa-eye text-amber-500"></i> Зрение
+                    </button>
+                    <button class="filter-btn px-2 py-1 rounded text-xs font-medium bg-[var(--bg-secondary)] border border-[var(--border-color)] hover:border-indigo-400 transition" data-filter="hearing">
+                        <i class="fa-solid fa-ear-listen text-purple-500"></i> Слух
+                    </button>
+                    <button class="filter-btn px-2 py-1 rounded text-xs font-medium bg-[var(--bg-secondary)] border border-[var(--border-color)] hover:border-indigo-400 transition" data-filter="hyperactive">
+                        <i class="fa-solid fa-bolt text-rose-500"></i> Гипер
+                    </button>
+                    <button class="filter-btn px-2 py-1 rounded text-xs font-medium bg-[var(--bg-secondary)] border border-[var(--border-color)] hover:border-indigo-400 transition" data-filter="height-high">
+                        <i class="fa-solid fa-arrow-up text-blue-500"></i> Высокие
+                    </button>
+                    <button class="filter-btn px-2 py-1 rounded text-xs font-medium bg-[var(--bg-secondary)] border border-[var(--border-color)] hover:border-indigo-400 transition" data-filter="height-low">
+                        <i class="fa-solid fa-arrow-down text-slate-400"></i> Низкие
+                    </button>
+                </div>
+                <div class="mt-2">
+                    <input type="text" id="search-student" placeholder="🔍 Поиск ученика..." 
+                        class="w-full border border-[var(--border-color)] rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-[var(--bg-secondary)] text-[var(--text-primary)]">
+                </div>
+            </div>
+
+            <!-- Unassigned List -->
+            <div class="flex-1 overflow-y-auto p-3 flex flex-col">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+                        <i class="fa-solid fa-user-plus"></i> Не рассажены
+                    </h3>
+                    <span id="unassigned-count" class="text-xs text-[var(--text-secondary)]">0</span>
+                </div>
+                
+                <div id="unassigned-list" class="space-y-2 min-h-[100px] flex-1 rounded-lg border-2 border-dashed border-[var(--border-color)] p-2 transition-colors">
+                    <!-- Dynamic -->
+                </div>
+            </div>
+
+            <!-- Stats Footer -->
+            <div class="p-3 border-t border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-secondary)] space-y-1">
+                <div class="font-semibold text-[var(--text-primary)] mb-1">📊 Статистика:</div>
+                <div class="grid grid-cols-2 gap-1">
+                    <span>👁️ Зрение: <span id="stat-vision" class="font-bold">0</span></span>
+                    <span>👂 Слух: <span id="stat-hearing" class="font-bold">0</span></span>
+                    <span>⚡ Гипер: <span id="stat-hyper" class="font-bold">0</span></span>
+                    <span>📏 Высокие: <span id="stat-high" class="font-bold">0</span></span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CLASSROOM GRID -->
+        <section class="flex-1 flex flex-col bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] shadow-inner overflow-hidden">
+             
+            <div class="bg-emerald-800 text-emerald-100 py-2 px-4 shadow-inner flex justify-between items-center border-b-4 border-emerald-900 no-print">
+                <div class="flex items-center gap-2 font-mono text-sm uppercase tracking-widest font-bold">
+                    <i class="fa-solid fa-chalkboard"></i> ШКОЛЬНАЯ ДОСКА (ФРОНТ)
+                </div>
+                <div class="text-xs opacity-75 font-sans flex items-center gap-3">
+                    <span><i class="fa-solid fa-arrow-left"></i> Окна</span>
+                    <span>|</span>
+                    <span>Стена <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-auto p-6 flex justify-center items-center">
+                <div id="classroom-grid" class="grid grid-cols-3 gap-x-10 gap-y-6 max-w-5xl w-full">
+                    <!-- 15 Desks -->
+                </div>
+            </div>
+            
+            <div class="bg-slate-200 dark:bg-slate-700 border-t border-[var(--border-color)] py-1.5 text-center text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-widest no-print">
+                Задняя часть класса
+            </div>
+        </section>
+    </main>
+
+    <!-- HISTORY PANEL (collapsible) -->
+    <div id="history-panel" class="fixed bottom-20 right-4 w-72 max-h-96 bg-[var(--bg-secondary)] rounded-xl shadow-2xl border border-[var(--border-color)] overflow-hidden hidden no-print">
+        <div class="p-3 border-b border-[var(--border-color)] flex justify-between items-center bg-[var(--bg-primary)]">
+            <span class="font-bold text-sm"><i class="fa-solid fa-clock-rotate-left"></i> История (Ctrl+Z)</span>
+            <button id="btn-close-history" class="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div id="history-list" class="overflow-y-auto max-h-72 p-2 space-y-1">
+            <!-- History items -->
+        </div>
+    </div>
+
+    <!-- FLOATING ACTION BUTTONS -->
+    <div class="fixed bottom-4 right-4 flex flex-col gap-2 no-print">
+        <button id="btn-toggle-history" class="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition hover:scale-110" title="История действий">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+        </button>
+        <button id="btn-stats-modal" class="bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-full shadow-lg transition hover:scale-110" title="Статистика">
+            <i class="fa-solid fa-chart-pie"></i>
+        </button>
+    </div>
+
+    <!-- MODAL -->
+    <div id="student-modal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-[var(--bg-secondary)] rounded-xl shadow-xl max-w-md w-full overflow-hidden transform transition-all">
+            <div class="bg-[var(--bg-primary)] px-6 py-4 border-b border-[var(--border-color)] flex justify-between items-center">
+                <h3 id="modal-title" class="text-lg font-bold text-[var(--text-primary)]">Добавить ученика</h3>
+                <button id="modal-close-btn" class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xl font-bold">&times;</button>
+            </div>
+            
+            <form id="student-modal-form" class="p-6 space-y-4">
+                <input type="hidden" id="modal-student-id">
+                
+                <div>
+                    <label class="block text-xs font-semibold text-[var(--text-secondary)] uppercase mb-1">ФИО ученика *</label>
+                    <input type="text" id="param-name" required placeholder="Напр. Александр Иванов" 
+                        class="w-full border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-[var(--bg-primary)] text-[var(--text-primary)]">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-[var(--text-secondary)] uppercase mb-1">Пол</label>
+                        <select id="param-gender" class="w-full border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-[var(--bg-primary)] text-[var(--text-primary)]">
+                            <option value="male">Мальчик</option>
+                            <option value="female">Девочка</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-[var(--text-secondary)] uppercase mb-1">Рост</label>
+                        <select id="param-height" class="w-full border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-[var(--bg-primary)] text-[var(--text-primary)]">
+                            <option value="low">Низкий</option>
+                            <option value="medium" selected>Средний</option>
+                            <option value="high">Высокий</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-[var(--text-secondary)] uppercase mb-1">Уровень успеваемости</label>
+                    <select id="param-level" class="w-full border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-[var(--bg-primary)] text-[var(--text-primary)]">
+                        <option value="strong">Сильный</option>
+                        <option value="medium" selected>Средний</option>
+                        <option value="weak">Слабый</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2 pt-2 border-t border-[var(--border-color)]">
+                    <label class="block text-xs font-semibold text-[var(--text-secondary)] uppercase mb-1">Особенности</label>
+                    
+                    <label class="flex items-center space-x-3 p-2 rounded-lg border border-[var(--border-color)] hover:bg-[var(--bg-primary)] cursor-pointer">
+                        <input type="checkbox" id="param-vision" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
+                        <span class="text-sm font-medium text-[var(--text-primary)] flex items-center gap-2">
+                            <i class="fa-solid fa-eye text-amber-500 w-4"></i> Слабое зрение
+                        </span>
+                    </label>
+
+                    <label class="flex items-center space-x-3 p-2 rounded-lg border border-[var(--border-color)] hover:bg-[var(--bg-primary)] cursor-pointer">
+                        <input type="checkbox" id="param-hearing" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
+                        <span class="text-sm font-medium text-[var(--text-primary)] flex items-center gap-2">
+                            <i class="fa-solid fa-ear-listen text-purple-500 w-4"></i> Слабый слух
+                        </span>
+                    </label>
+
+                    <label class="flex items-center space-x-3 p-2 rounded-lg border border-[var(--border-color)] hover:bg-[var(--bg-primary)] cursor-pointer">
+                        <input type="checkbox" id="param-hyperactive" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
+                        <span class="text-sm font-medium text-[var(--text-primary)] flex items-center gap-2">
+                            <i class="fa-solid fa-bolt text-rose-500 w-4"></i> Гиперактивность
+                        </span>
+                    </label>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-[var(--text-secondary)] uppercase mb-1">Не сажать с</label>
+                    <select id="param-conflict" class="w-full border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-[var(--bg-primary)] text-[var(--text-primary)]">
+                        <option value="">Нет</option>
+                    </select>
+                    <p class="text-xs text-[var(--text-secondary)] mt-1">Выберите ученика, с которым нельзя сажать</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-[var(--text-secondary)] uppercase mb-1">Заметки</label>
+                    <input type="text" id="param-notes" placeholder="Дополнительная информация" 
+                        class="w-full border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-[var(--bg-primary)] text-[var(--text-primary)]">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)]">
+                    <button type="button" id="modal-cancel-btn" class="px-4 py-2 border border-[var(--border-color)] rounded-lg text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]">Отмена</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- STATS MODAL -->
+    <div id="stats-modal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-[var(--bg-secondary)] rounded-xl shadow-xl max-w-2xl w-full overflow-hidden">
+            <div class="bg-[var(--bg-primary)] px-6 py-4 border-b border-[var(--border-color)] flex justify-between items-center">
+                <h3 class="text-lg font-bold text-[var(--text-primary)]">📊 Аналитика рассадки</h3>
+                <button id="stats-close-btn" class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xl font-bold">&times;</button>
+            </div>
+            <div class="p-6" id="stats-content">
+                <!-- Dynamic stats -->
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-24 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // ============================================================
+    // CONFIGURATION
+    // ============================================================
+    const TOTAL_DESKS = 15;
+    const ROW_COUNT = 5;
+    const COL_COUNT = 3;
+    const MAX_STUDENTS = 30;
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    let students = [];
+    let seatAssignments = {};
+    let draggedStudentId = null;
+    let history = [];
+    let historyIndex = -1;
+    let currentTheme = 'light';
+    let activeFilters = new Set();
+    let searchQuery = '';
+    let autoSaveTimer = null;
+
+    // ============================================================
+    // DOM REFS
+    // ============================================================
+    const classroomGrid = document.getElementById('classroom-grid');
+    const unassignedList = document.getElementById('unassigned-list');
+    const studentCountBadge = document.getElementById('student-count-badge');
+    const unassignedCount = document.getElementById('unassigned-count');
+    const occupiedCount = document.getElementById('occupied-count');
+    const totalStudentsSpan = document.getElementById('total-students');
+    const saveStatus = document.getElementById('save-status');
+
+    // ============================================================
+    // TOAST SYSTEM
+    // ============================================================
+    function showToast(message, type = 'info', duration = 3000) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        
+        const bgColors = {
+            info: 'bg-slate-800 text-white',
+            success: 'bg-emerald-600 text-white',
+            warning: 'bg-amber-600 text-white',
+            error: 'bg-rose-600 text-white'
+        };
+
+        const icons = {
+            info: 'fa-solid fa-circle-info',
+            success: 'fa-solid fa-circle-check',
+            warning: 'fa-solid fa-triangle-exclamation',
+            error: 'fa-solid fa-circle-xmark'
+        };
+
+        toast.className = `px-4 py-3 rounded-lg shadow-lg text-sm font-medium flex items-center gap-3 ${bgColors[type]} pointer-events-auto toast-enter`;
+        toast.innerHTML = `<i class="${icons[type]}"></i><span>${message}</span>`;
+        
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.remove('toast-enter');
+            toast.classList.add('toast-exit');
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+
+    // ============================================================
+    // SAVE / LOAD
+    // ============================================================
+    function saveState() {
+        const data = {
+            students,
+            seatAssignments,
+            version: '3.0',
+            timestamp: Date.now()
+        };
+        localStorage.setItem('seating_data_v3', JSON.stringify(data));
+        saveStatus.textContent = '💾 Сохранено';
+        saveStatus.className = 'text-green-400';
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+            saveStatus.textContent = 'Сохранено';
+            saveStatus.className = 'text-green-400';
+        }, 1500);
+    }
+
+    function loadState() {
+        try {
+            const raw = localStorage.getItem('seating_data_v3');
+            if (!raw) return false;
+            const data = JSON.parse(raw);
+            if (data.version === '3.0') {
+                students = data.students || [];
+                seatAssignments = data.seatAssignments || {};
+                return true;
+            }
+        } catch (e) {
+            console.warn('Failed to load state:', e);
+        }
+        return false;
+    }
+
+    function autoSave() {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(saveState, 1000);
+    }
+
+    // ============================================================
+    // HISTORY (Undo/Redo)
+    // ============================================================
+    function pushHistory(action, data) {
+        // Remove any future states if we're in the middle of history
+        history = history.slice(0, historyIndex + 1);
+        history.push({ action, data: JSON.parse(JSON.stringify(data)), timestamp: Date.now() });
+        historyIndex = history.length - 1;
+        if (history.length > 50) {
+            history.shift();
+            historyIndex--;
+        }
+        updateHistoryUI();
+    }
+
+    function undo() {
+        if (historyIndex > 0) {
+            historyIndex--;
+            restoreState(history[historyIndex].data);
+            showToast('↩️ Отменено действие', 'info');
+        } else {
+            showToast('Нет действий для отмены', 'warning');
+        }
+    }
+
+    function restoreState(data) {
+        students = data.students || [];
+        seatAssignments = data.seatAssignments || {};
+        renderAll();
+        autoSave();
+    }
+
+    function updateHistoryUI() {
+        const list = document.getElementById('history-list');
+        list.innerHTML = '';
+        const start = Math.max(0, history.length - 10);
+        for (let i = history.length - 1; i >= start; i--) {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            const time = new Date(history[i].timestamp).toLocaleTimeString();
+            item.innerHTML = `<span class="text-[var(--text-secondary)]">${time}</span> <span class="font-medium">${history[i].action}</span>`;
+            item.onclick = () => {
+                historyIndex = i;
+                restoreState(history[i].data);
+                showToast(`↩️ Восстановлено: ${history[i].action}`, 'info');
+            };
+            list.appendChild(item);
+        }
+    }
+
+    // ============================================================
+    // THEME
+    // ============================================================
+    function toggleTheme() {
+        currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        localStorage.setItem('theme', currentTheme);
+        document.getElementById('btn-theme-toggle').innerHTML = `
+            <i class="fa-solid ${currentTheme === 'light' ? 'fa-moon' : 'fa-sun'}"></i>
+            <span class="hidden sm:inline">${currentTheme === 'light' ? 'Тёмная' : 'Светлая'}</span>
+        `;
+    }
+
+    function loadTheme() {
+        const saved = localStorage.getItem('theme');
+        if (saved) {
+            currentTheme = saved;
+            document.documentElement.setAttribute('data-theme', saved);
+            document.getElementById('btn-theme-toggle').innerHTML = `
+                <i class="fa-solid ${currentTheme === 'light' ? 'fa-moon' : 'fa-sun'}"></i>
+                <span class="hidden sm:inline">${currentTheme === 'light' ? 'Тёмная' : 'Светлая'}</span>
+            `;
+        }
+    }
+
+    // ============================================================
+    // STATS
+    // ============================================================
+    function updateStats() {
+        const stats = {
+            vision: 0, hearing: 0, hyperactive: 0, high: 0, low: 0,
+            male: 0, female: 0, strong: 0, weak: 0
+        };
+        students.forEach(s => {
+            if (s.vision) stats.vision++;
+            if (s.hearing) stats.hearing++;
+            if (s.hyperactive) stats.hyperactive++;
+            if (s.height === 'high') stats.high++;
+            if (s.height === 'low') stats.low++;
+            if (s.gender === 'male') stats.male++;
+            if (s.gender === 'female') stats.female++;
+            if (s.level === 'strong') stats.strong++;
+            if (s.level === 'weak') stats.weak++;
+        });
+        document.getElementById('stat-vision').textContent = stats.vision;
+        document.getElementById('stat-hearing').textContent = stats.hearing;
+        document.getElementById('stat-hyper').textContent = stats.hyperactive;
+        document.getElementById('stat-high').textContent = stats.high;
+        return stats;
+    }
+
+    function showStatsModal() {
+        const stats = updateStats();
+        const assigned = Object.keys(seatAssignments).length;
+        const content = document.getElementById('stats-content');
+        content.innerHTML = `
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 bg-[var(--bg-primary)] rounded-lg">
+                    <div class="text-2xl font-bold text-indigo-600">${students.length}</div>
+                    <div class="text-sm text-[var(--text-secondary)]">Всего учеников</div>
+                </div>
+                <div class="p-4 bg-[var(--bg-primary)] rounded-lg">
+                    <div class="text-2xl font-bold text-emerald-600">${assigned}</div>
+                    <div class="text-sm text-[var(--text-secondary)]">Рассажено</div>
+                </div>
+                <div class="p-4 bg-[var(--bg-primary)] rounded-lg">
+                    <div class="text-2xl font-bold text-amber-500">${stats.vision}</div>
+                    <div class="text-sm text-[var(--text-secondary)]">Слабое зрение</div>
+                </div>
+                <div class="p-4 bg-[var(--bg-primary)] rounded-lg">
+                    <div class="text-2xl font-bold text-purple-500">${stats.hearing}</div>
+                    <div class="text-sm text-[var(--text-secondary)]">Слабый слух</div>
+                </div>
+                <div class="p-4 bg-[var(--bg-primary)] rounded-lg">
+                    <div class="text-2xl font-bold text-rose-500">${stats.hyperactive}</div>
+                    <div class="text-sm text-[var(--text-secondary)]">Гиперактивные</div>
+                </div>
+                <div class="p-4 bg-[var(--bg-primary)] rounded-lg">
+                    <div class="text-2xl font-bold text-blue-500">${stats.high}</div>
+                    <div class="text-sm text-[var(--text-secondary)]">Высокий рост</div>
+                </div>
+                <div class="p-4 bg-[var(--bg-primary)] rounded-lg">
+                    <div class="text-2xl font-bold text-pink-500">${stats.female}</div>
+                    <div class="text-sm text-[var(--text-secondary)]">Девочки</div>
+                </div>
+                <div class="p-4 bg-[var(--bg-primary)] rounded-lg">
+                    <div class="text-2xl font-bold text-blue-600">${stats.male}</div>
+                    <div class="text-sm text-[var(--text-secondary)]">Мальчики</div>
+                </div>
+            </div>
+            <div class="mt-4 p-4 bg-[var(--bg-primary)] rounded-lg">
+                <div class="text-sm font-semibold mb-2">📈 Распределение по рядам</div>
+                <div id="row-distribution" class="space-y-2"></div>
+            </div>
+        `;
+
+        // Row distribution
+        const rowDist = {};
+        for (let r = 0; r < ROW_COUNT; r++) {
+            rowDist[r] = 0;
+        }
+        for (const seatId in seatAssignments) {
+            const deskIndex = parseInt(seatId.split('-')[1]);
+            const row = Math.floor(deskIndex / COL_COUNT);
+            rowDist[row] = (rowDist[row] || 0) + 1;
+        }
+
+        const rowContainer = document.getElementById('row-distribution');
+        for (let r = 0; r < ROW_COUNT; r++) {
+            const pct = students.length > 0 ? Math.round((rowDist[r] / students.length) * 100) : 0;
+            rowContainer.innerHTML += `
+                <div>
+                    <div class="flex justify-between text-xs">
+                        <span>Ряд ${r + 1}</span>
+                        <span>${rowDist[r]} чел. (${pct}%)</span>
+                    </div>
+                    <div class="w-full bg-[var(--border-color)] rounded-full h-2">
+                        <div class="bg-indigo-600 h-2 rounded-full transition-all" style="width: ${pct}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.getElementById('stats-modal').classList.remove('hidden');
+    }
+
+    // ============================================================
+    // RENDER FUNCTIONS
+    // ============================================================
+    function renderAll() {
+        renderClassroomLayout();
+        renderStudentsList();
+        updateCounters();
+        updateStats();
+        updateConflictSelect();
+        autoSave();
+    }
+
+    function updateCounters() {
+        const assigned = Object.keys(seatAssignments).length;
+        studentCountBadge.textContent = `${students.length}/${MAX_STUDENTS}`;
+        unassignedCount.textContent = students.length - assigned;
+        occupiedCount.textContent = assigned;
+        totalStudentsSpan.textContent = students.length;
+    }
+
+    function renderStudentsList() {
+        unassignedList.innerHTML = '';
+        
+        const assignedIds = new Set(Object.values(seatAssignments));
+        let unassigned = students.filter(s => !assignedIds.has(s.id));
+
+        // Apply filters
+        if (activeFilters.size > 0 || searchQuery) {
+            unassigned = unassigned.filter(s => {
+                // Search
+                if (searchQuery && !s.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+                // Filters
+                for (const filter of activeFilters) {
+                    if (filter === 'vision' && !s.vision) return false;
+                    if (filter === 'hearing' && !s.hearing) return false;
+                    if (filter === 'hyperactive' && !s.hyperactive) return false;
+                    if (filter === 'height-high' && s.height !== 'high') return false;
+                    if (filter === 'height-low' && s.height !== 'low') return false;
+                }
+                return true;
+            });
+        }
+
+        if (unassigned.length === 0) {
+            unassignedList.innerHTML = `
+                <div class="h-full flex flex-col items-center justify-center text-[var(--text-secondary)] text-xs py-8 text-center">
+                    <i class="fa-solid fa-circle-check text-2xl text-emerald-400 mb-2"></i>
+                    <span>${students.length === 0 ? 'Нет учеников' : 'Все ученики рассажены!'}</span>
+                </div>`;
+            return;
+        }
+
+        unassigned.forEach(student => {
+            const card = createStudentCard(student);
+            unassignedList.appendChild(card);
+        });
+    }
+
+    function createStudentCard(student, isSeated = false) {
+        const div = document.createElement('div');
+        div.className = `student-item bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-sm hover:shadow transition p-2.5 flex items-center justify-between gap-2 text-sm`;
+        div.draggable = true;
+        div.dataset.id = student.id;
+
+        // Special classes
+        const specials = [];
+        if (student.vision) specials.push('special-vision');
+        if (student.hearing) specials.push('special-hearing');
+        if (student.hyperactive) specials.push('special-hyperactive');
+        if (specials.length > 1) specials.push('special-multiple');
+        div.className += ` ${specials.join(' ')}`;
+
+        let badges = '';
+        if (student.vision) badges += `<i class="fa-solid fa-eye text-amber-500 text-xs" title="Слабое зрение"></i>`;
+        if (student.hearing) badges += `<i class="fa-solid fa-ear-listen text-purple-500 text-xs" title="Слабый слух"></i>`;
+        if (student.hyperactive) badges += `<i class="fa-solid fa-bolt text-rose-500 text-xs" title="Гиперактивность"></i>`;
+        
+        const heightClass = student.height === 'high' ? 'text-blue-500' : (student.height === 'low' ? 'text-slate-400' : 'text-slate-500');
+        const heightLabel = student.height === 'high' ? 'Высокий' : (student.height === 'low' ? 'Низкий' : 'Средний');
+        badges += `<i class="fa-solid fa-up-down ${heightClass} text-xs" title="Рост: ${heightLabel}"></i>`;
+
+        // Level badge
+        const levelColors = { strong: 'text-emerald-600', medium: 'text-amber-600', weak: 'text-rose-600' };
+        const levelLabels = { strong: '💪', medium: '📚', weak: '📖' };
+        badges += `<span class="text-xs ${levelColors[student.level]}" title="Уровень: ${student.level}">${levelLabels[student.level]}</span>`;
+
+        const genderBorder = student.gender === 'female' ? 'border-l-4 border-l-pink-400' : 'border-l-4 border-l-blue-400';
+        div.className += ` ${genderBorder}`;
+
+        div.innerHTML = `
+            <div class="flex items-center gap-2 overflow-hidden flex-1">
+                <i class="fa-solid fa-grip-vertical text-[var(--text-secondary)] text-xs"></i>
+                <span class="font-medium text-[var(--text-primary)] truncate" title="${student.name}">${student.name}</span>
+            </div>
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+                ${badges}
+                <button class="btn-edit-student text-[var(--text-secondary)] hover:text-indigo-600 text-xs p-1" title="Редактировать">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="btn-delete-student text-[var(--text-secondary)] hover:text-rose-600 text-xs p-1" title="Удалить">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        `;
+
+        div.querySelector('.btn-edit-student').addEventListener('click', (e) => {
+            e.stopPropagation();
+            openEditModal(student);
+        });
+
+        div.querySelector('.btn-delete-student').addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteStudent(student.id);
+        });
+
+        div.addEventListener('dragstart', handleDragStart);
+        div.addEventListener('dragend', handleDragEnd);
+
+        return div;
+    }
+
+    function renderClassroomLayout() {
+        classroomGrid.innerHTML = '';
+
+        for (let r = 0; r < ROW_COUNT; r++) {
+            for (let c = 0; c < COL_COUNT; c++) {
+                const deskIndex = r * COL_COUNT + c;
+                
+                const deskCard = document.createElement('div');
+                deskCard.className = 'desk-card border rounded-xl p-3 shadow-sm flex flex-col gap-2 relative';
+                deskCard.dataset.deskIndex = deskIndex;
+
+                const deskHeader = document.createElement('div');
+                deskHeader.className = 'flex justify-between items-center text-xs font-semibold text-[var(--text-secondary)] border-b border-[var(--border-color)] pb-1.5';
+                deskHeader.innerHTML = `
+                    <span>Парта ${deskIndex + 1}</span>
+                    <span class="text-[10px] bg-[var(--bg-primary)] px-1.5 py-0.5 rounded text-[var(--text-secondary)]">Ряд ${r + 1}</span>
+                `;
+                deskCard.appendChild(deskHeader);
+
+                const seatsContainer = document.createElement('div');
+                seatsContainer.className = 'grid grid-cols-2 gap-2';
+
+                for (let s = 0; s < 2; s++) {
+                    const seatId = `desk-${deskIndex}-seat-${s}`;
+                    const studentId = seatAssignments[seatId];
+                    const student = students.find(item => item.id === studentId);
+
+                    const seatSlot = document.createElement('div');
+                    seatSlot.className = `seat-slot rounded-lg border-2 p-1.5 flex flex-col justify-center items-center relative min-h-[70px]`;
+                    seatSlot.dataset.seatId = seatId;
+                    seatSlot.dataset.deskIndex = deskIndex;
+
+                    if (student) {
+                        seatSlot.classList.add('occupied');
+                        const seatContent = createSeatContent(student, seatId);
+                        seatSlot.appendChild(seatContent);
+                    } else {
+                        seatSlot.innerHTML = `<span class="text-[11px] text-[var(--text-secondary)] font-medium">Место ${s + 1}</span>`;
+                    }
+
+                    seatSlot.addEventListener('dragover', handleDragOver);
+                    seatSlot.addEventListener('dragenter', handleDragEnter);
+                    seatSlot.addEventListener('dragleave', handleDragLeave);
+                    seatSlot.addEventListener('drop', handleDrop);
+
+                    // Context menu
+                    seatSlot.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        if (student) {
+                            if (confirm(`Освободить место для ${student.name}?`)) {
+                                removeFromSeat(seatId);
+                            }
+                        }
+                    });
+
+                    seatsContainer.appendChild(seatSlot);
+                }
+
+                deskCard.appendChild(seatsContainer);
+                classroomGrid.appendChild(deskCard);
+            }
+        }
+    }
+
+    function createSeatContent(student, seatId) {
+        const div = document.createElement('div');
+        div.className = 'student-item w-full h-full flex flex-col justify-between p-1.5 bg-[var(--bg-secondary)] border border-indigo-200 dark:border-indigo-800 rounded shadow-xs';
+        div.draggable = true;
+        div.dataset.id = student.id;
+        div.dataset.currentSeat = seatId;
+
+        const genderTagClass = student.gender === 'female' ? 'bg-pink-500' : 'bg-blue-500';
+
+        let badges = '';
+        if (student.vision) badges += `<i class="fa-solid fa-eye text-amber-500 text-[10px]" title="Зрение"></i>`;
+        if (student.hearing) badges += `<i class="fa-solid fa-ear-listen text-purple-500 text-[10px]" title="Слух"></i>`;
+        if (student.hyperactive) badges += `<i class="fa-solid fa-bolt text-rose-500 text-[10px]" title="Гипер"></i>`;
+
+        div.innerHTML = `
+            <div class="flex items-center justify-between gap-1">
+                <span class="w-1.5 h-1.5 rounded-full ${genderTagClass}"></span>
+                <span class="text-xs font-semibold text-[var(--text-primary)] truncate flex-1 leading-tight" title="${student.name}">${student.name}</span>
+                <button class="btn-remove-seat text-[var(--text-secondary)] hover:text-rose-500 text-[10px]" title="Убрать">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="flex items-center gap-1 mt-1 text-[10px]">
+                ${badges}
+                <span class="ml-auto text-[9px] text-[var(--text-secondary)] capitalize">${student.height === 'high' ? 'выс.' : (student.height === 'low' ? 'низ.' : 'ср.')}</span>
+                <span class="text-[9px] text-[var(--text-secondary)]">${student.level === 'strong' ? '💪' : student.level === 'weak' ? '📖' : '📚'}</span>
+            </div>
+        `;
+
+        div.querySelector('.btn-remove-seat').addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeFromSeat(seatId);
+        });
+
+        div.addEventListener('dragstart', handleDragStart);
+        div.addEventListener('dragend', handleDragEnd);
+
+        return div;
+    }
+
+    // ============================================================
+    // DRAG & DROP
+    // ============================================================
+    function handleDragStart(e) {
+        draggedStudentId = e.currentTarget.dataset.id;
+        e.currentTarget.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', draggedStudentId);
+        e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragEnd(e) {
+        e.currentTarget.classList.remove('dragging');
+        document.querySelectorAll('.seat-slot').forEach(slot => slot.classList.remove('drag-over'));
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const slot = e.currentTarget.closest('.seat-slot');
+        if (slot) {
+            const deskIndex = parseInt(slot.dataset.deskIndex);
+            document.querySelectorAll(`[data-desk-index="${deskIndex}"] .seat-slot`).forEach(s => 
+                s.classList.add('desk-hover')
+            );
+        }
+    }
+
+    function handleDragEnter(e) {
+        e.preventDefault();
+        const slot = e.currentTarget.closest('.seat-slot');
+        if (slot) slot.classList.add('drag-over');
+    }
+
+    function handleDragLeave(e) {
+        const slot = e.currentTarget.closest('.seat-slot');
+        if (slot) {
+            slot.classList.remove('drag-over');
+            const deskIndex = parseInt(slot.dataset.deskIndex);
+            document.querySelectorAll(`[data-desk-index="${deskIndex}"] .seat-slot`).forEach(s => 
+                s.classList.remove('desk-hover')
+            );
+        }
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        const slot = e.currentTarget.closest('.seat-slot');
+        if (!slot) return;
+        
+        slot.classList.remove('drag-over');
+        const deskIndex = parseInt(slot.dataset.deskIndex);
+        document.querySelectorAll(`[data-desk-index="${deskIndex}"] .seat-slot`).forEach(s => 
+            s.classList.remove('desk-hover')
+        );
+
+        const targetSeatId = slot.dataset.seatId;
+        if (draggedStudentId) {
+            assignSeat(draggedStudentId, targetSeatId);
+        }
+    }
+
+    // Drop on unassigned area
+    function setupDropZone() {
+        const dropZone = unassignedList.parentElement;
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            unassignedList.classList.add('bg-indigo-50', 'border-indigo-300');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            unassignedList.classList.remove('bg-indigo-50', 'border-indigo-300');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            unassignedList.classList.remove('bg-indigo-50', 'border-indigo-300');
+            if (draggedStudentId) {
+                const seatKey = Object.keys(seatAssignments).find(k => seatAssignments[k] === draggedStudentId);
+                if (seatKey) {
+                    removeFromSeat(seatKey);
+                }
+            }
+        });
+    }
+
+    // ============================================================
+    // STATE MUTATIONS
+    // ============================================================
+    function addStudent(studentData) {
+        if (students.length >= MAX_STUDENTS) {
+            showToast('Максимум 30 учеников!', 'warning');
+            return;
+        }
+        
+        const newId = 's-' + Date.now();
+        const newStudent = { 
+            id: newId, 
+            ...studentData,
+            level: studentData.level || 'medium',
+            conflicts: studentData.conflicts || []
+        };
+        students.push(newStudent);
+        pushHistory('Добавлен ученик', { students, seatAssignments });
+        renderAll();
+        showToast(`✅ ${newStudent.name} добавлен`, 'success');
+    }
+
+    function updateStudent(id, studentData) {
+        const index = students.findIndex(s => s.id === id);
+        if (index !== -1) {
+            const oldName = students[index].name;
+            students[index] = { id, ...studentData };
+            pushHistory(`Обновлён ${oldName}`, { students, seatAssignments });
+            renderAll();
+            showToast(`✅ Данные обновлены`, 'success');
+        }
+    }
+
+    function deleteStudent(id) {
+        const student = students.find(s => s.id === id);
+        if (!student) return;
+        
+        if (!confirm(`Удалить ${student.name}?`)) return;
+        
+        students = students.filter(s => s.id !== id);
+        for (const seatId in seatAssignments) {
+            if (seatAssignments[seatId] === id) {
+                delete seatAssignments[seatId];
+            }
+        }
+        pushHistory(`Удалён ${student.name}`, { students, seatAssignments });
+        renderAll();
+        showToast(`🗑️ ${student.name} удалён`, 'info');
+    }
+
+    function assignSeat(studentId, targetSeatId) {
+        const existingStudentId = seatAssignments[targetSeatId];
+        const previousSeat = Object.keys(seatAssignments).find(key => seatAssignments[key] === studentId);
+        
+        // Check conflicts
+        const student = students.find(s => s.id === studentId);
+        const targetStudent = students.find(s => s.id === existingStudentId);
+        
+        if (targetStudent && student && student.conflicts && student.conflicts.includes(targetStudent.id)) {
+            showToast('⚠️ Конфликт! Нельзя сажать с этим учеником', 'error');
+            return;
+        }
+        if (targetStudent && targetStudent.conflicts && targetStudent.conflicts.includes(studentId)) {
+            showToast('⚠️ Конфликт! Ученик не хочет сидеть с этим', 'error');
+            return;
+        }
+
+        if (existingStudentId && previousSeat) {
+            seatAssignments[previousSeat] = existingStudentId;
+            seatAssignments[targetSeatId] = studentId;
+        } else if (existingStudentId) {
+            delete seatAssignments[targetSeatId];
+            seatAssignments[targetSeatId] = studentId;
+        } else {
+            if (previousSeat) {
+                delete seatAssignments[previousSeat];
+            }
+            seatAssignments[targetSeatId] = studentId;
+        }
+
+        pushHistory('Перемещение ученика', { students, seatAssignments });
+        renderAll();
+    }
+
+    function removeFromSeat(seatId) {
+        const studentId = seatAssignments[seatId];
+        if (studentId) {
+            const student = students.find(s => s.id === studentId);
+            delete seatAssignments[seatId];
+            pushHistory(`Освобождено место для ${student?.name || 'ученика'}`, { students, seatAssignments });
+            renderAll();
+            showToast(`↩️ Ученик возвращён в список`, 'info');
+        }
+    }
+
+    // ============================================================
+    // SMART AUTO-PLACEMENT
+    // ============================================================
+    function runAutoPlacement() {
+        if (students.length === 0) {
+            showToast('Нет учеников для рассадки!', 'warning');
+            return;
+        }
+
+        seatAssignments = {};
+
+        // Sort by priority
+        const sorted = [...students].sort((a, b) => {
+            // 1. Vision/Hearing first
+            const aSensory = (a.vision || a.hearing) ? 1 : 0;
+            const bSensory = (b.vision || b.hearing) ? 1 : 0;
+            if (aSensory !== bSensory) return bSensory - aSensory;
+
+            // 2. Hyperactivity
+            if (a.hyperactive !== b.hyperactive) return (b.hyperactive ? 1 : 0) - (a.hyperactive ? 1 : 0);
+
+            // 3. Height (low first)
+            const heightScore = { low: 0, medium: 1, high: 2 };
+            return heightScore[a.height] - heightScore[b.height];
+        });
+
+        // Seat order: front to back, left to right
+        const seatOrder = [];
+        for (let r = 0; r < ROW_COUNT; r++) {
+            for (let c = 0; c < COL_COUNT; c++) {
+                const deskIdx = r * COL_COUNT + c;
+                seatOrder.push(`desk-${deskIdx}-seat-0`);
+                seatOrder.push(`desk-${deskIdx}-seat-1`);
+            }
+        }
+
+        // Place with conflict avoidance
+        const placed = new Set();
+        const seatIndex = 0;
+        const seatingMap = new Map();
+
+        sorted.forEach((student) => {
+            // Find compatible seat
+            let found = false;
+            for (let i = 0; i < seatOrder.length && !found; i++) {
+                const seatId = seatOrder[i];
+                if (seatAssignments[seatId]) continue;
+
+                // Check if neighbor has conflict
+                const neighborId = getNeighborSeat(seatId);
+                if (neighborId) {
+                    const neighborStudentId = seatAssignments[neighborId];
+                    if (neighborStudentId) {
+                        const neighbor = students.find(s => s.id === neighborStudentId);
+                        if (neighbor && student.conflicts && student.conflicts.includes(neighbor.id)) continue;
+                        if (neighbor && neighbor.conflicts && neighbor.conflicts.includes(student.id)) continue;
+                    }
+                }
+
+                seatAssignments[seatId] = student.id;
+                found = true;
+            }
+            
+            // If no compatible seat, place anywhere
+            if (!found) {
+                for (const seatId of seatOrder) {
+                    if (!seatAssignments[seatId]) {
+                        seatAssignments[seatId] = student.id;
+                        break;
+                    }
+                }
+            }
+        });
+
+        pushHistory('Авто-рассадка', { students, seatAssignments });
+        renderAll();
+        showToast('🎯 Умная рассадка выполнена!', 'success');
+    }
+
+    function getNeighborSeat(seatId) {
+        const parts = seatId.split('-');
+        const deskIdx = parseInt(parts[1]);
+        const seatNum = parseInt(parts[3]);
+        const neighborNum = seatNum === 0 ? 1 : 0;
+        return `desk-${deskIdx}-seat-${neighborNum}`;
+    }
+
+    // ============================================================
+    // EXPORT FUNCTIONS
+    // ============================================================
+    function exportToPDF() {
+        const element = document.getElementById('app');
+        const opt = {
+            margin: [10, 10, 10, 10],
+            filename: `Рассадка_${new Date().toLocaleDateString()}.pdf`,
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+            html2canvas: { scale: 2 }
+        };
+        document.body.classList.add('no-print');
+        showToast('📄 Создание PDF...', 'info');
+        html2pdf().set(opt).from(element).save().then(() => {
+            document.body.classList.remove('no-print');
+            showToast('✅ PDF готов!', 'success');
+        });
+    }
+
+    function exportJSON() {
+        const data = {
+            students,
+            seatAssignments,
+            exportDate: new Date().toISOString(),
+            version: '3.0'
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `рассадка_${new Date().toLocaleDateString()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('💾 Данные экспортированы', 'success');
+    }
+
+    function importJSON(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.version === '3.0' && data.students) {
+                    students = data.students;
+                    seatAssignments = data.seatAssignments || {};
+                    pushHistory('Импорт данных', { students, seatAssignments });
+                    renderAll();
+                    showToast('✅ Данные импортированы!', 'success');
+                } else {
+                    showToast('❌ Неверный формат файла', 'error');
+                }
+            } catch (err) {
+                showToast('❌ Ошибка при импорте', 'error');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // ============================================================
+    // VOICE INPUT
+    // ============================================================
+    let voiceRecognition = null;
+
+    function initVoiceInput() {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            voiceRecognition = new SpeechRecognition();
+            voiceRecognition.lang = 'ru-RU';
+            voiceRecognition.continuous = false;
+            voiceRecognition.interimResults = true;
+
+            voiceRecognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = 0; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                document.getElementById('quick-name').value = transcript.trim();
+            };
+
+            voiceRecognition.onend = () => {
+                document.getElementById('btn-voice-input').classList.remove('listening');
+                document.getElementById('btn-voice-input').innerHTML = '<i class="fa-solid fa-microphone text-lg"></i>';
+                const name = document.getElementById('quick-name').value.trim();
+                if (name) {
+                    addStudent({
+                        name: name,
+                        gender: 'male',
+                        height: 'medium',
+                        vision: false,
+                        hearing: false,
+                        hyperactive: false,
+                        level: 'medium',
+                        notes: '',
+                        conflicts: []
+                    });
+                    document.getElementById('quick-name').value = '';
+                }
+            };
+
+            document.getElementById('btn-voice-input').addEventListener('click', () => {
+                if (voiceRecognition) {
+                    voiceRecognition.start();
+                    document.getElementById('btn-voice-input').classList.add('listening');
+                    document.getElementById('btn-voice-input').innerHTML = '<i class="fa-solid fa-microphone-slash text-lg"></i>';
+                    showToast('🎤 Слушаю...', 'info');
+                }
+            });
+        } else {
+            document.getElementById('btn-voice-input').style.display = 'none';
+        }
+    }
+
+    // ============================================================
+    // UPDATE CONFLICT SELECT
+    // ============================================================
+    function updateConflictSelect() {
+        const select = document.getElementById('param-conflict');
+        const currentId = document.getElementById('modal-student-id').value;
+        select.innerHTML = '<option value="">Нет</option>';
+        students.forEach(s => {
+            if (s.id !== currentId) {
+                const option = document.createElement('option');
+                option.value = s.id;
+                option.textContent = s.name;
+                select.appendChild(option);
+            }
+        });
+    }
+
+    // ============================================================
+    // MODAL CONTROLS
+    // ============================================================
+    function openAddModal() {
+        document.getElementById('modal-title').textContent = 'Добавить ученика';
+        document.getElementById('modal-student-id').value = '';
+        document.getElementById('student-modal-form').reset();
+        document.getElementById('param-conflict').value = '';
+        document.getElementById('student-modal').classList.remove('hidden');
+        updateConflictSelect();
+    }
+
+    function openEditModal(student) {
+        document.getElementById('modal-title').textContent = '✏️ Редактировать ученика';
+        document.getElementById('modal-student-id').value = student.id;
+        document.getElementById('param-name').value = student.name;
+        document.getElementById('param-gender').value = student.gender;
+        document.getElementById('param-height').value = student.height;
+        document.getElementById('param-level').value = student.level || 'medium';
+        document.getElementById('param-vision').checked = student.vision || false;
+        document.getElementById('param-hearing').checked = student.hearing || false;
+        document.getElementById('param-hyperactive').checked = student.hyperactive || false;
+        document.getElementById('param-notes').value = student.notes || '';
+        document.getElementById('param-conflict').value = student.conflicts && student.conflicts[0] || '';
+        document.getElementById('student-modal').classList.remove('hidden');
+        updateConflictSelect();
+    }
+
+    function closeModal() {
+        document.getElementById('student-modal').classList.add('hidden');
+    }
+
+    // ============================================================
+    // KEYBOARD SHORTCUTS
+    // ============================================================
+    document.addEventListener('keydown', (e) => {
+        // Ctrl+Z - Undo
+        if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+            e.preventDefault();
+            undo();
+        }
+        // Ctrl+Y - Redo
+        if (e.ctrlKey && e.key === 'y') {
+            e.preventDefault();
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                restoreState(history[historyIndex].data);
+                showToast('↪️ Восстановлено действие', 'info');
+            }
+        }
+        // Escape - close modal
+        if (e.key === 'Escape') {
+            closeModal();
+            document.getElementById('stats-modal').classList.add('hidden');
+        }
+    });
+
+    // ============================================================
+    // EVENT LISTENERS SETUP
+    // ============================================================
+    function setupEventListeners() {
+        // Modal
+        document.getElementById('btn-open-modal').addEventListener('click', openAddModal);
+        document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+        document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
+
+        document.getElementById('student-modal-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('modal-student-id').value;
+            const conflictId = document.getElementById('param-conflict').value;
+            const studentData = {
+                name: document.getElementById('param-name').value.trim(),
+                gender: document.getElementById('param-gender').value,
+                height: document.getElementById('param-height').value,
+                level: document.getElementById('param-level').value,
+                vision: document.getElementById('param-vision').checked,
+                hearing: document.getElementById('param-hearing').checked,
+                hyperactive: document.getElementById('param-hyperactive').checked,
+                notes: document.getElementById('param-notes').value.trim(),
+                conflicts: conflictId ? [conflictId] : []
+            };
+
+            if (!studentData.name) {
+                showToast('⚠️ Введите имя ученика', 'warning');
+                return;
+            }
+
+            if (id) {
+                updateStudent(id, studentData);
+            } else {
+                addStudent(studentData);
+            }
+            closeModal();
+        });
+
+        // Quick add
+        document.getElementById('quick-add-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('quick-name').value.trim();
+            if (name) {
+                addStudent({
+                    name,
+                    gender: 'male',
+                    height: 'medium',
+                    level: 'medium',
+                    vision: false,
+                    hearing: false,
+                    hyperactive: false,
+                    notes: '',
+                    conflicts: []
+                });
+                document.getElementById('quick-name').value = '';
+            }
+        });
+
+        // Search
+        document.getElementById('search-student').addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderStudentsList();
+        });
+
+        // Filters
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const filter = btn.dataset.filter;
+                if (activeFilters.has(filter)) {
+                    activeFilters.delete(filter);
+                    btn.classList.remove('active');
+                } else {
+                    activeFilters.add(filter);
+                    btn.classList.add('active');
+                }
+                renderStudentsList();
+            });
+        });
+
+        // Buttons
+        document.getElementById('btn-auto-seat').addEventListener('click', runAutoPlacement);
+        document.getElementById('btn-reset-seats').addEventListener('click', () => {
+            if (Object.keys(seatAssignments).length === 0) return;
+            if (confirm('Освободить все места?')) {
+                seatAssignments = {};
+                pushHistory('Сброс всех мест', { students, seatAssignments });
+                renderAll();
+                showToast('🧹 Все места освобождены', 'info');
+            }
+        });
+
+        document.getElementById('btn-clear-all').addEventListener('click', () => {
+            if (confirm('⚠️ Удалить всех учеников и схему?')) {
+                students = [];
+                seatAssignments = {};
+                history = [];
+                historyIndex = -1;
+                renderAll();
+                showToast('🗑️ Всё очищено', 'info');
+                saveState();
+            }
+        });
+
+        document.getElementById('btn-export-pdf').addEventListener('click', exportToPDF);
+        document.getElementById('btn-export-json').addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                if (e.target.files[0]) importJSON(e.target.files[0]);
+            };
+            input.click();
+        });
+
+        // Theme
+        document.getElementById('btn-theme-toggle').addEventListener('click', toggleTheme);
+
+        // History panel
+        document.getElementById('btn-toggle-history').addEventListener('click', () => {
+            const panel = document.getElementById('history-panel');
+            panel.classList.toggle('hidden');
+            updateHistoryUI();
+        });
+        document.getElementById('btn-close-history').addEventListener('click', () => {
+            document.getElementById('history-panel').classList.add('hidden');
+        });
+
+        // Stats modal
+        document.getElementById('btn-stats-modal').addEventListener('click', showStatsModal);
+        document.getElementById('stats-close-btn').addEventListener('click', () => {
+            document.getElementById('stats-modal').classList.add('hidden');
+        });
+
+        // Auto-save on any change
+        document.addEventListener('click', () => { /* autoSave triggered from renderAll */ });
+    }
+
+    // ============================================================
+    // INITIALIZATION
+    // ============================================================
+    function init() {
+        loadTheme();
+        
+        // Load saved data
+        const loaded = loadState();
+        if (!loaded) {
+            // Default students
+            students = [
+                { id: 's-1', name: 'Иванов Максим', gender: 'male', height: 'high', level: 'strong', vision: true, hearing: false, hyperactive: false, notes: 'Плохо видит', conflicts: [] },
+                { id: 's-2', name: 'Петрова Анна', gender: 'female', height: 'low', level: 'medium', vision: false, hearing: true, hyperactive: false, notes: '', conflicts: [] },
+                { id: 's-3', name: 'Смирнов Артем', gender: 'male', height: 'medium', level: 'weak', vision: false, hearing: false, hyperactive: true, notes: 'Нужен контроль', conflicts: [] },
+                { id: 's-4', name: 'Ковалева София', gender: 'female', height: 'low', level: 'strong', vision: true, hearing: false, hyperactive: false, notes: '', conflicts: [] },
+                { id: 's-5', name: 'Сидоров Дмитрий', gender: 'male', height: 'high', level: 'medium', vision: false, hearing: false, hyperactive: false, notes: '', conflicts: [] },
+                { id: 's-6', name: 'Кузнецова Виктория', gender: 'female', height: 'medium', level: 'medium', vision: false, hearing: false, hyperactive: true, notes: '', conflicts: [] },
+                { id: 's-7', name: 'Попов Егор', gender: 'male', height: 'low', level: 'weak', vision: false, hearing: false, hyperactive: false, notes: '', conflicts: [] },
+                { id: 's-8', name: 'Васильева Алиса', gender: 'female', height: 'high', level: 'strong', vision: false, hearing: false, hyperactive: false, notes: '', conflicts: [] }
+            ];
+            seatAssignments = {};
+        }
+
+        renderAll();
+        setupEventListeners();
+        setupDropZone();
+        initVoiceInput();
+
+        // Start with empty history
+        pushHistory('Начальное состояние', { students, seatAssignments });
+        
+        showToast('🚀 Система готова к работе!', 'success');
+    }
+
+    // Start the app
+    init();
+});
+</script>
+</body>
+</html>

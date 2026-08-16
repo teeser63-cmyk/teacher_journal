@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>Учительский журнал PRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: #f8fafc; 
+            padding-bottom: 70px; 
+            color: #1e293b;
+        }
+        .app-container { max-width: 1200px; margin: 0 auto; }
+        
+        .bottom-nav { 
+            position: fixed; bottom: 0; left: 0; right: 0; 
+            background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px);
+            border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; 
+            padding: 6px 0 12px; z-index: 1000; box-shadow: 0 -4px 20px rgba(0,0,0,0.04); 
+        }
+        .nav-item { 
+            display: flex; flex-direction: column; align-items: center; 
+            font-size: 10px; font-weight: 600; color: #94a3b8; cursor: pointer; 
+            padding: 4px 8px; border-radius: 12px; transition: all 0.2s ease; 
+            border: none; background: transparent; min-width: 56px; 
+        }
+        .nav-item.active { color: #3b82f6; background: #eff6ff; }
+        .nav-item svg { width: 22px; height: 22px; margin-bottom: 2px; stroke-width: 2.2; }
+        
+        .page { display: none; padding: 12px; animation: fadeIn 0.25s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .card { 
+            background: white; border-radius: 16px; padding: 16px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 12px; 
+            border: 1px solid #f1f5f9;
+        }
+        .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+        
+        .grade-input { 
+            width: 100%; height: 40px; text-align: center; font-size: 14px; font-weight: 700; 
+            border: 2px solid #e2e8f0; border-radius: 10px; background: white; color: #1e293b; transition: 0.2s;
+            outline: none;
+        }
+        .grade-input:focus { border-color: #3b82f6; background: #f0f7ff; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+        .grade-input.absent { color: #ef4444; font-weight: 800; background: #fef2f2; }
+        
+        .name-col { 
+            position: sticky; left: 0; background: white; z-index: 10; 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+            font-weight: 600; font-size: 12px; box-shadow: 4px 0 8px -4px rgba(0,0,0,0.05); padding: 0 8px; 
+            width: 100%; height: 100%; display: flex; align-items: center;
+        }
+        .header-cell { text-align: center; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; padding: 4px; }
+        .grid-row { display: grid; gap: 4px; align-items: center; padding: 4px 0; border-bottom: 1px solid #f1f5f9; }
+        .grid-row:hover { background: #f8fafc; }
+        .grid-row:hover .name-col { background: #f8fafc; }
+        
+        .tab-btn { 
+            padding: 8px 14px; border-radius: 14px; font-size: 12px; font-weight: 600; 
+            border: none; cursor: pointer; transition: all 0.2s; background: #f1f5f9; color: #64748b; white-space: nowrap; 
+        }
+        .tab-btn.active { background: #3b82f6; color: white; box-shadow: 0 4px 10px rgba(59,130,246,0.2); }
+        
+        .quarter-btn { 
+            padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; 
+            border: none; cursor: pointer; background: #f1f5f9; color: #64748b; transition: 0.2s; 
+        }
+        .quarter-btn.active { background: #3b82f6; color: white; }
+        
+        .btn { padding: 8px 16px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: 0.2s; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;}
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:active { transform: scale(0.96); }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-success { background: #22c55e; color: white; }
+        .btn-outline { background: transparent; border: 2px solid #e2e8f0; color: #475569; }
+        
+        .calendar-day { 
+            position: relative; cursor: pointer; padding: 4px; border-radius: 10px; transition: 0.2s; 
+            min-height: 36px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500;
+        }
+        .calendar-day:hover { background: #eff6ff; }
+        .calendar-day.today { background: #3b82f6; color: white; font-weight: 700; box-shadow: 0 4px 10px rgba(59,130,246,0.3); }
+        .calendar-day.has-task::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: #22c55e; }
+        .calendar-day.today.has-task::after { background: white; }
+        .calendar-day.has-lesson::before { content: ''; position: absolute; top: 4px; right: 4px; width: 4px; height: 4px; border-radius: 50%; background: #f59e0b; }
+        .calendar-day.weekend { color: #94a3b8; }
+        .calendar-day.today.weekend { color: white; }
+
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-green { background: #dcfce7; color: #166534; }
+        .badge-red { background: #fee2e2; color: #991b1b; }
+        .badge-yellow { background: #fef3c7; color: #92400e; }
+        .badge-blue { background: #dbeafe; color: #1e40af; }
+        
+        select, input[type="text"], input[type="number"], input[type="date"], input[type="time"], textarea { 
+            padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 13px; background: #f8fafc; width: 100%; transition: 0.2s; font-family: inherit;
+        }
+        select:focus, input:focus, textarea:focus { border-color: #3b82f6; outline: none; background: white; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6; }
+        
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.2s; }
+        .modal-overlay.open { display: flex; opacity: 1; }
+        .modal { background: white; border-radius: 24px; padding: 24px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); transform: scale(0.95); transition: transform 0.2s; }
+        .modal-overlay.open .modal { transform: scale(1); }
+        
+        .schedule-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; }
+        .schedule-table td, .schedule-table th { padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: center; }
+        .schedule-table td:last-child, .schedule-table th:last-child { border-right: none; }
+        .schedule-table tr:last-child td { border-bottom: none; }
+        .schedule-table th { background: #f8fafc; font-weight: 700; color: #475569; }
+        
+        @media print { .bottom-nav, .no-print { display: none !important; } body { padding: 0; background: white; } .page { display: block !important; } .card { box-shadow: none; border: 1px solid #ddd; } }
+
+        .report-card { font-size: 14px; }
+        .report-card table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        .report-card th, .report-card td { padding: 6px 8px; border: 1px solid #e2e8f0; text-align: center; }
+        .report-card th { background: #f1f5f9; font-weight: 700; font-size: 12px; }
+        .report-card .total-row { background: #eff6ff; font-weight: 700; }
+        .report-card .grade-cell-table { 
+            display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: 700; min-width: 28px; font-size: 13px; margin: 1px;
+        }
+        .report-card .grade-cell-table.good { background: #dcfce7; color: #166534; }
+        .report-card .grade-cell-table.ok { background: #fef3c7; color: #92400e; }
+        .report-card .grade-cell-table.bad { background: #fee2e2; color: #991b1b; }
+        .report-card .grade-cell-table.none { background: #f1f5f9; color: #94a3b8; }
+        .report-card .grade-cell-table.absent { background: #e2e8f0; color: #64748b; }
+        .report-card .subject-col { text-align: left; font-weight: 500; }
+        .report-card .quarter-selector { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+        .report-card .quarter-selector button { padding: 4px 14px; border-radius: 8px; border: 2px solid #e2e8f0; background: white; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; }
+        .report-card .quarter-selector button.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+
+        .notification { padding: 12px 16px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 10px; border-left: 4px solid; }
+        .notification.info { background: #eff6ff; border-color: #3b82f6; }
+        .notification.warning { background: #fffbeb; border-color: #f59e0b; }
+        .notification.danger { background: #fef2f2; border-color: #ef4444; }
+        .notification.success { background: #f0fdf4; border-color: #22c55e; }
+        .notification .icon { font-size: 18px; line-height: 1.4; }
+        .notification .text { font-size: 13px; color: #1e293b; flex: 1; }
+        .notification .text strong { color: #0f172a; }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="app">
+    
+    <div class="page active" id="page-home">
+        <div class="flex justify-between items-center mb-4 px-1">
+            <h1 class="text-2xl font-black text-slate-800">📚 Мой Класс</h1>
+            <span class="text-sm font-medium text-slate-500 bg-white px-3 py-1 rounded-full shadow-sm" id="today-date"></span>
+        </div>
+
+        <div id="notifications-container" class="mb-4"></div>
+
+        <div class="card bg-gradient-to-r from-blue-50 to-indigo-50 border-none shadow-sm">
+            <p class="text-slate-600 text-sm font-medium">📌 Быстрый доступ к оценкам и расписанию</p>
+            <div class="flex gap-3 mt-3 flex-wrap">
+                <button class="btn btn-primary shadow-sm" onclick="switchNav('page-grades')">📝 Оценки</button>
+                <button class="btn btn-outline bg-white" onclick="switchNav('page-classroom')">👥 Мой класс</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">📅 Календарь</h3>
+                <div class="flex gap-2 items-center bg-slate-50 p-1 rounded-xl border border-slate-100">
+                    <button class="p-1 px-3 text-slate-500 hover:text-blue-600 font-bold rounded-lg transition" onclick="changeMonth(-1)">◀</button>
+                    <span class="font-bold text-sm text-slate-700 min-w-[100px] text-center" id="calendar-month"></span>
+                    <button class="p-1 px-3 text-slate-500 hover:text-blue-600 font-bold rounded-lg transition" onclick="changeMonth(1)">▶</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                <div class="text-xs font-bold text-slate-400">Пн</div><div class="text-xs font-bold text-slate-400">Вт</div>
+                <div class="text-xs font-bold text-slate-400">Ср</div><div class="text-xs font-bold text-slate-400">Чт</div>
+                <div class="text-xs font-bold text-slate-400">Пт</div><div class="text-xs font-bold text-slate-400">Сб</div>
+                <div class="text-xs font-bold text-slate-400">Вс</div>
+            </div>
+            <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center"></div>
+            <div id="day-tasks" class="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-100 text-sm text-slate-600 hidden"></div>
+            <div class="flex gap-4 justify-center mt-3 text-[10px] font-bold text-slate-500">
+                <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-green-500"></div> Задачи</span>
+                <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-amber-500"></div> Уроки</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">⏰ Мои задачи</h3>
+                <button class="btn btn-primary text-sm py-1.5 px-3" onclick="openAddReminder()">+ Добавить</button>
+            </div>
+            <div id="reminder-list" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <div class="page" id="page-grades">
+        <div class="card bg-white sticky top-0 z-20 shadow-sm border-b border-slate-200 !rounded-b-none !mb-0 p-3">
+            <div class="flex flex-wrap gap-3 items-center justify-between">
+                <div class="flex flex-wrap gap-2 items-center w-full md:w-auto">
+                    <select id="grade-subject" class="flex-1 md:w-auto min-w-[140px] py-1.5 px-3 text-sm font-semibold" onchange="renderGradebook()"></select>
+                    <div id="quarter-selector" class="flex gap-1 bg-slate-100 p-1 rounded-xl"></div>
+                </div>
+                <button class="btn btn-primary text-sm py-1.5 px-4 shadow-sm w-full md:w-auto" onclick="addGradeColumn()">+ Колонка</button>
+            </div>
+        </div>
+        <div class="card !rounded-t-none border-t-0 p-0 overflow-hidden shadow-md">
+            <div class="scroll-x p-3" id="gradebook-scroll">
+                <div id="gradebook-table" class="min-w-fit"></div>
+            </div>
+        </div>
+        <div class="text-xs text-slate-400 mt-2 px-2 flex gap-3 font-medium flex-wrap">
+            <span>* 1-10 (оценка)</span>
+            <span>* Н (отсутствовал)</span>
+            <span>* Пусто (удалить)</span>
+            <span>* ↑↓ Enter для навигации</span>
+        </div>
+    </div>
+
+    <div class="page" id="page-classroom">
+        <div class="flex gap-2 overflow-x-auto pb-2 mb-2 no-print" id="classroom-tabs">
+            <button class="tab-btn active shadow-sm" onclick="switchClassroomTab('students')">👥 Список</button>
+            <button class="tab-btn shadow-sm" onclick="switchClassroomTab('progress')">📈 Успеваемость</button>
+            <button class="tab-btn shadow-sm" onclick="switchClassroomTab('schedule')">📅 Расписание</button>
+            <button class="tab-btn shadow-sm" onclick="switchClassroomTab('report')">📄 Табель</button>
+        </div>
+        
+        <div id="tab-students" class="classroom-tab">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="font-bold text-lg text-slate-800">Ученики (<span id="students-count-label">0</span>)</h2>
+                <button class="btn btn-primary py-1.5 px-3 text-sm shadow-sm" onclick="openAddStudent()">+ Ученик</button>
+            </div>
+            <div id="student-list" class="space-y-2"></div>
+        </div>
+
+        <div id="tab-progress" class="classroom-tab hidden">
+            <div class="flex gap-2 mb-4 flex-wrap bg-white p-2 rounded-xl shadow-sm border border-slate-100 items-center justify-between">
+                <div class="flex gap-1" id="progress-quarter-selector"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="card !mb-0 border-l-4 border-l-yellow-400">
+                    <h3 class="font-bold text-slate-800 mb-3 text-sm flex items-center gap-2">🏆 Рейтинг учеников</h3>
+                    <div id="top-students-list" class="space-y-2"></div>
+                </div>
+                <div class="card !mb-0 border-l-4 border-l-indigo-400">
+                    <h3 class="font-bold text-slate-800 mb-3 text-sm flex items-center gap-2">⭐ Рейтинг предметов</h3>
+                    <div id="top-subjects-list" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <div class="card mb-4 border-t-4 border-t-blue-500">
+                <div class="flex flex-wrap justify-between items-center mb-3 gap-3">
+                    <h3 class="font-bold text-slate-800 text-base">Индивидуальный табель и ИИ-Аналитика</h3>
+                    <select id="report-student-select" class="w-auto py-1.5 px-3 font-semibold text-sm" onchange="renderIndividualReport()">
+                        <option value="">-- Выберите ученика --</option>
+                    </select>
+                </div>
+                <div id="individual-report-container">
+                    <div class="text-center py-6 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-sm">
+                        Выберите ученика из списка выше, чтобы посмотреть его оценки и получить советы от ИИ.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-0 overflow-hidden border border-slate-200">
+                <div class="bg-slate-50 p-3 border-b border-slate-200 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-700 text-sm">Сводный табель успеваемости класса</h3>
+                    <button class="btn btn-outline py-1 px-3 text-xs" onclick="printReport()">🖨️ Печать</button>
+                </div>
+                <div class="scroll-x p-3">
+                    <div id="progress-table-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-schedule" class="classroom-tab hidden">
+            <div class="flex justify-between items-center mb-3">
+                <div>
+                    <h2 class="font-bold text-lg text-slate-800">Расписание уроков</h2>
+                    <p class="text-xs text-slate-500">Повторяется еженедельно</p>
+                </div>
+                <button class="btn btn-primary py-1.5 px-3 text-sm shadow-sm" onclick="openAddSchedule()">+ Урок</button>
+            </div>
+            <div id="schedule-content" class="space-y-4"></div>
+        </div>
+
+        <div id="tab-report" class="classroom-tab hidden">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="font-bold text-lg text-slate-800">📄 Табель для родителей</h2>
+                <div class="flex gap-2 no-print flex-wrap">
+                    <button class="btn btn-primary py-1.5 px-3 text-sm shadow-sm" onclick="printReportCard()">🖨️ Печать</button>
+                    <button class="btn btn-outline py-1.5 px-3 text-sm" onclick="exportReportCard()">📤 Экспорт</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-4" id="report-student-list">
+            </div>
+            <div id="report-card-container" class="mt-4"></div>
+        </div>
+    </div>
+
+    <div class="page" id="page-settings">
+        <h2 class="text-2xl font-black mb-4 text-slate-800">⚙️ Настройки</h2>
+        
+        <div class="card">
+            <h3 class="font-bold text-slate-800 mb-3 border-b pb-2">Учебные предметы</h3>
+            <div id="subject-list-settings" class="flex flex-wrap gap-2 mb-3"></div>
+            <div class="flex gap-2">
+                <input type="text" id="new-subject-input" placeholder="Название предмета" class="max-w-[200px]">
+                <button class="btn btn-primary" onclick="addSubject()">Добавить</button>
+            </div>
+        </div>
+        
+        <div class="card border-red-100 bg-red-50/30">
+            <h3 class="font-bold text-red-600 mb-2">Резервное копирование</h3>
+            <p class="text-xs text-slate-600 mb-4">Создавайте бэкапы перед сбросом или обновлением.</p>
+            <div class="flex flex-wrap gap-3">
+                <button class="btn btn-outline bg-white flex-1 min-w-[120px]" onclick="exportData()">📤 Сохранить файл</button>
+                <button class="btn btn-outline bg-white flex-1 min-w-[120px]" onclick="document.getElementById('import-input').click()">📥 Загрузить файл</button>
+                <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
+                <div class="w-full mt-2">
+                    <button class="btn btn-danger w-full" onclick="confirmResetAll()">🗑️ Удалить все данные</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav no-print">
+        <button class="nav-item active" data-page="page-home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"/></svg>
+            <span>Главная</span>
+        </button>
+        <button class="nav-item" data-page="page-grades">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>
+            <span>Оценки</span>
+        </button>
+        <button class="nav-item" data-page="page-classroom">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <span>Мой Класс</span>
+        </button>
+        <button class="nav-item" data-page="page-settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span>Настройки</span>
+        </button>
+    </nav>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="modal-content"><div id="modal-body"></div></div>
+</div>
+
+<script>
+const DEFAULT_SUBJECTS = ["Математика", "Русский язык", "Физика", "Химия", "Биология", "История", "Английский"];
+
+let data = {
+    students: [],
+    subjects: [...DEFAULT_SUBJECTS],
+    grades: {},
+    reminders: [],
+    schedule: [],
+    currentQuarter: 1,
+    progressQuarter: 1,
+    currentSubject: "Математика",
+    calendarMonth: new Date().getMonth(),
+    calendarYear: new Date().getFullYear(),
+    reportQuarter: 1,
+};
+
+function loadData() {
+    try {
+        const saved = localStorage.getItem("teacher_pro_v9");
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            data = { ...data, ...parsed };
+        }
+    } catch(e) { console.error("Data load error", e); }
+    
+    if (!data.students) data.students = [];
+    if (!data.subjects?.length) data.subjects = [...DEFAULT_SUBJECTS];
+    if (!data.grades) data.grades = {};
+    if (!data.reminders) data.reminders = [];
+    if (!data.schedule) data.schedule = [];
+    
+    const m = new Date().getMonth();
+    if (m >= 8 && m <= 9) data.currentQuarter = 1;
+    else if (m >= 10 && m <= 11) data.currentQuarter = 2;
+    else if (m >= 0 && m <= 2) data.currentQuarter = 3;
+    else data.currentQuarter = 4;
+    data.progressQuarter = data.currentQuarter;
+    data.reportQuarter = data.currentQuarter;
+    
+    saveData();
+}
+
+function saveData() { 
+    localStorage.setItem("teacher_pro_v9", JSON.stringify(data)); 
+}
+
+function openModal(htmlContent) {
+    document.getElementById('modal-body').innerHTML = htmlContent;
+    const overlay = document.getElementById('modal-overlay');
+    overlay.style.display = 'flex';
+    setTimeout(() => overlay.classList.add('open'), 10);
+}
+
+function closeModal() {
+    const overlay = document.getElementById('modal-overlay');
+    overlay.classList.remove('open');
+    setTimeout(() => overlay.style.display = 'none', 200);
+}
+
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+
+function openConfirmModal(title, text, onConfirm) {
+    openModal(`
+        <div class="text-center">
+            <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">⚠️</div>
+            <h3 class="font-bold text-xl mb-2 text-slate-800">${title}</h3>
+            <p class="mb-6 text-slate-500 text-sm">${text}</p>
+            <div class="flex gap-3">
+                <button class="btn btn-outline flex-1" onclick="closeModal()">Отмена</button>
+                <button id="confirm-btn-yes" class="btn btn-danger flex-1">Да, уверен</button>
+            </div>
+        </div>
+    `);
+    document.getElementById('confirm-btn-yes').onclick = () => { onConfirm(); closeModal(); };
+}
+
+function init() {
+    loadData();
+    
+    const today = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById("today-date").textContent = today.toLocaleDateString("ru-RU", options);
+    
+    renderSelects();
+    renderHome();
+    
+    document.querySelectorAll(".nav-item").forEach(btn => {
+        btn.addEventListener("click", function() {
+            const pageId = this.dataset.page;
+            document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+            document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+            document.getElementById(pageId).classList.add("active");
+            
+            if (pageId === "page-home") renderHome();
+            if (pageId === "page-grades") renderGradebook();
+            if (pageId === "page-classroom") renderClassroom();
+            if (pageId === "page-settings") renderSettings();
+            window.scrollTo(0, 0);
+        });
+    });
+}
+
+function switchNav(pageId) {
+    document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
+    document.querySelector(`.nav-item[data-page="${pageId}"]`)?.classList.add("active");
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(pageId).classList.add("active");
+    if (pageId === "page-home") renderHome();
+    if (pageId === "page-grades") renderGradebook();
+    if (pageId === "page-classroom") renderClassroom();
+    if (pageId === "page-settings") renderSettings();
+    window.scrollTo(0, 0);
+}
+
+function renderSelects() {
+    const subOpts = data.subjects.map(s => `<option value="${s}">${s}</option>`).join("");
+    document.getElementById("grade-subject").innerHTML = subOpts;
+    document.getElementById("grade-subject").value = data.currentSubject || data.subjects[0];
+    renderQuarterSelectors();
+}
+
+function renderQuarterSelectors() {
+    const qSel = document.getElementById("quarter-selector");
+    if (qSel) {
+        qSel.innerHTML = [1,2,3,4].map(q => 
+            `<button class="quarter-btn ${q === data.currentQuarter ? "active" : ""}" onclick="setQuarter(${q})">${q} чет.</button>`
+        ).join("");
+    }
+    const pqSel = document.getElementById("progress-quarter-selector");
+    if (pqSel) {
+        pqSel.innerHTML = [1,2,3,4].map(q => 
+            `<button class="quarter-btn ${q === data.progressQuarter ? "active" : ""}" onclick="setProgressQuarter(${q})">${q} четверть</button>`
+        ).join("");
+    }
+}
+
+// ========== УМНЫЕ УВЕДОМЛЕНИЯ ==========
+function renderNotifications() {
+    const container = document.getElementById("notifications-container");
+    if (!container) return;
+    const notifications = [];
+    
+    // 1. Двойки
+    const badGrades = {};
+    for (const key in data.grades) {
+        const val = data.grades[key];
+        if (val && val !== 'Н') {
+            const num = parseInt(val);
+            if (!isNaN(num) && num <= 2) {
+                const parts = key.split('_');
+                if (parts.length >= 2) {
+                    const student = parts[1];
+                    if (!badGrades[student]) badGrades[student] = [];
+                    badGrades[student].push({ subject: parts[0], grade: num });
+                }
+            }
+        }
+    }
+    const badStudents = Object.keys(badGrades);
+    if (badStudents.length > 0) {
+        notifications.push({
+            type: 'danger',
+            icon: '🚨',
+            text: `<strong>Внимание!</strong> У ${badStudents.length} учеников есть двойки: ${badStudents.slice(0, 3).join(', ')}${badStudents.length > 3 ? ' и др.' : ''}.`
+        });
+    }
+    
+    // 2. Нет оценок по предметам
+    const subjectsWithNoGrades = [];
+    data.subjects.forEach(sub => {
+        let hasGrade = false;
+        for (const key in data.grades) {
+            if (key.startsWith(sub + '_')) { hasGrade = true; break; }
+        }
+        if (!hasGrade) subjectsWithNoGrades.push(sub);
+    });
+    if (subjectsWithNoGrades.length > 0) {
+        notifications.push({
+            type: 'warning',
+            icon: '⚠️',
+            text: `Нет ни одной оценки по предметам: <strong>${subjectsWithNoGrades.join(', ')}</strong>`
+        });
+    }
+    
+    // 3. Пустые ячейки в последнем уроке
+    const subject = data.currentSubject;
+    const q = data.currentQuarter;
+    let maxCol = 1;
+    for (const key in data.grades) {
+        if (key.startsWith(`${subject}_`)) {
+            const parts = key.split('_');
+            if (parts[2] === `q${q}`) maxCol = Math.max(maxCol, parseInt(parts[3]));
+        }
+    }
+    if (maxCol > 0 && data.students.length > 0) {
+        const emptyStudents = [];
+        data.students.forEach(s => {
+            const key = `${subject}_${s}_q${q}_${maxCol}`;
+            if (!data.grades[key] || data.grades[key] === '') emptyStudents.push(s);
+        });
+        if (emptyStudents.length > 0 && emptyStudents.length < data.students.length) {
+            notifications.push({
+                type: 'info',
+                icon: '📝',
+                text: `Осталось выставить оценки за последний урок по ${subject} для: <strong>${emptyStudents.slice(0, 5).join(', ')}${emptyStudents.length > 5 ? ' и др.' : ''}</strong>`
+            });
+        }
+        if (emptyStudents.length === data.students.length && data.students.length > 0) {
+            notifications.push({
+                type: 'info',
+                icon: '📝',
+                text: `Никто не оценен по ${subject} за последний урок. Пора выставить отметки!`
+            });
+        }
+    }
+    
+    // 4. Отличники
+    const excellentStudents = [];
+    data.students.forEach(s => {
+        let allGood = true;
+        let hasGrades = false;
+        for (const key in data.grades) {
+            if (key.includes(`_${s}_`)) {
+                hasGrades = true;
+                const val = data.grades[key];
+                if (val && val !== 'Н') {
+                    const num = parseInt(val);
+                    if (isNaN(num) || num < 8) { allGood = false; break; }
+                }
+            }
+        }
+        if (hasGrades && allGood) excellentStudents.push(s);
+    });
+    if (excellentStudents.length > 0) {
+        notifications.push({
+            type: 'success',
+            icon: '⭐',
+            text: `Отличники класса: <strong>${excellentStudents.join(', ')}</strong> — все оценки 8+!`
+        });
+    }
+    
+    // 5. Низкий средний балл
+    const lowStudents = [];
+    data.students.forEach(s => {
+        let sum = 0, count = 0;
+        for (const key in data.grades) {
+            if (key.includes(`_${s}_`)) {
+                const val = data.grades[key];
+                if (val && val !== 'Н') {
+                    const num = parseInt(val);
+                    if (!isNaN(num)) { sum += num; count++; }
+                }
+            }
+        }
+        if (count > 0) {
+            const avg = sum / count;
+            if (avg < 4) lowStudents.push({ name: s, avg: avg.toFixed(1) });
+        }
+    });
+    if (lowStudents.length > 0) {
+        notifications.push({
+            type: 'warning',
+            icon: '🔴',
+            text: `Низкая успеваемость (ср.балл < 4): ${lowStudents.map(s => `<strong>${s.name}</strong> (${s.avg})`).join(', ')}`
+        });
+    }
+    
+    if (notifications.length === 0) {
+        container.innerHTML = `
+            <div class="notification success">
+                <span class="icon">✅</span>
+                <span class="text">Всё в порядке! Все ученики оценены, двоечников нет.</span>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = notifications.map(n => `
+        <div class="notification ${n.type}">
+            <span class="icon">${n.icon}</span>
+            <span class="text">${n.text}</span>
+        </div>
+    `).join('');
+}
+
+function renderHome() {
+    renderCalendar();
+    renderReminderList();
+    renderNotifications();
+}
+
+function renderCalendar() {
+    const year = data.calendarYear, month = data.calendarMonth;
+    const monthNames = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+    document.getElementById("calendar-month").textContent = `${monthNames[month]} ${year}`;
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    
+    let html = "";
+    const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+    for (let i = 0; i < startOffset; i++) html += "<div></div>";
+    
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const dateObj = new Date(year, month, d);
+        const isToday = dateStr === todayStr;
+        const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+        
+        let hasTask = false;
+        data.reminders.forEach(r => { if (!r.done && r.date === dateStr) hasTask = true; });
+        
+        const dayOfWeek = dateObj.getDay(); 
+        const schedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1; 
+        const hasLesson = data.schedule.some(lesson => lesson.day === schedDay);
+        
+        html += `<div class="calendar-day ${isToday ? "today" : ""} ${isWeekend ? "weekend" : ""} ${hasTask ? "has-task" : ""} ${hasLesson ? "has-lesson" : ""}" onclick="showDayTasks('${dateStr}')">${d}</div>`;
+    }
+    document.getElementById("calendar-grid").innerHTML = html;
+    document.getElementById("day-tasks").classList.add("hidden");
+}
+
+function changeMonth(delta) {
+    data.calendarMonth += delta;
+    if (data.calendarMonth > 11) { data.calendarMonth = 0; data.calendarYear++; }
+    if (data.calendarMonth < 0) { data.calendarMonth = 11; data.calendarYear--; }
+    renderCalendar();
+}
+
+function showDayTasks(dateStr) {
+    let tasks = [];
+    
+    const dateObj = new Date(dateStr);
+    const dayOfWeek = dateObj.getDay();
+    const schedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const lessons = data.schedule.filter(l => l.day === schedDay).sort((a,b) => a.time.localeCompare(b.time));
+    lessons.forEach(l => tasks.push({ text: `Урок: ${l.time} - ${l.subject}`, type: 'lesson' }));
+
+    data.reminders.filter(r => r.date === dateStr).forEach(r => {
+        tasks.push({ text: r.text, type: 'task', done: r.done, id: r.id, priority: r.priority });
+    });
+    
+    const container = document.getElementById("day-tasks");
+    container.classList.remove("hidden");
+    
+    if (!tasks.length) { 
+        container.innerHTML = `Событий на ${dateObj.toLocaleDateString('ru-RU')} нет`; 
+        return; 
+    }
+    
+    container.innerHTML = `<div class="font-bold mb-2 pb-1 border-b text-slate-800">${dateObj.toLocaleDateString('ru-RU')}</div>` + 
+        tasks.map(t => {
+            let indicator = "";
+            if (t.type === 'lesson') indicator = '<div class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></div>';
+            else {
+                const colors = {'high':'bg-red-500','medium':'bg-yellow-500','low':'bg-green-500'};
+                indicator = `<div class="w-2 h-2 rounded-full ${colors[t.priority] || 'bg-slate-500'} shrink-0"></div>`;
+            }
+            return `
+            <div class="flex justify-between items-start py-1.5 ${t.done ? "line-through opacity-50" : ""}">
+                <span class="flex items-start gap-2 leading-tight">
+                    <div class="mt-1">${indicator}</div>
+                    <span>${t.text}</span>
+                </span>
+            </div>`;
+        }).join("");
+}
+
+function renderReminderList() {
+    const container = document.getElementById("reminder-list");
+    const reminders = data.reminders.filter(r => !r.done).sort((a,b) => a.date.localeCompare(b.date));
+    
+    if (!reminders.length) { 
+        container.innerHTML = '<div class="text-slate-400 text-sm text-center py-4 bg-slate-50 rounded-xl border border-dashed border-slate-200">Отличная работа! Активных задач нет.</div>'; 
+        return; 
+    }
+    
+    container.innerHTML = reminders.slice(0, 5).map(r => `
+        <div class="flex justify-between items-center p-3 bg-white rounded-xl border border-slate-100 shadow-sm mb-2">
+            <div>
+                <div class="text-sm font-semibold text-slate-800">${r.text}</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">📅 ${new Date(r.date).toLocaleDateString('ru-RU')}</div>
+            </div>
+            <button onclick="toggleReminder('${r.id}')" class="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 text-green-500 flex items-center justify-center hover:bg-green-50 hover:border-green-300 transition shadow-sm">✓</button>
+        </div>
+    `).join("");
+}
+
+function openAddReminder() {
+    openModal(`
+        <h3 class="font-bold text-xl mb-4 text-slate-800">➕ Новая задача</h3>
+        <label class="text-xs font-bold text-slate-500 mb-1 block">Описание задачи</label>
+        <input type="text" id="reminder-text" class="w-full mb-3" placeholder="Что нужно сделать?">
+        
+        <label class="text-xs font-bold text-slate-500 mb-1 block">Дата</label>
+        <input type="date" id="reminder-date" class="w-full mb-3" value="${new Date().toISOString().split("T")[0]}">
+        
+        <label class="text-xs font-bold text-slate-500 mb-1 block">Приоритет</label>
+        <select id="reminder-priority" class="w-full mb-5">
+            <option value="low">🟢 Низкий</option>
+            <option value="medium" selected>🟡 Средний</option>
+            <option value="high">🔴 Высокий</option>
+        </select>
+        <div class="flex gap-3">
+            <button class="btn btn-outline flex-1" onclick="closeModal()">Отмена</button>
+            <button class="btn btn-primary flex-1" onclick="addReminder()">Добавить</button>
+        </div>
+    `);
+}
+
+function addReminder() {
+    const text = document.getElementById("reminder-text").value.trim();
+    const date = document.getElementById("reminder-date").value;
+    const priority = document.getElementById("reminder-priority").value;
+    if (text && date) {
+        data.reminders.push({ id: Date.now().toString(36), text, date, priority, done: false });
+        saveData(); closeModal(); renderHome();
+    }
+}
+
+function toggleReminder(id) {
+    const r = data.reminders.find(r => r.id === id);
+    if (r) { r.done = !r.done; saveData(); renderHome(); }
+}
+
+function setQuarter(q) {
+    data.currentQuarter = q;
+    renderQuarterSelectors();
+    renderGradebook();
+}
+
+// ========== ОЦЕНКИ ==========
+function renderGradebook() {
+    if (data.students.length === 0) {
+        document.getElementById("gradebook-table").innerHTML = `<div class="p-4 text-center text-slate-500">Добавьте учеников в разделе "Мой Класс"</div>`;
+        return;
+    }
+
+    const subject = document.getElementById("grade-subject").value;
+    const q = data.currentQuarter;
+    data.currentSubject = subject;
+    saveData();
+    
+    const container = document.getElementById("gradebook-table");
+    
+    let maxCol = 1;
+    for (const key in data.grades) {
+        if (key.startsWith(`${subject}_`)) {
+            const parts = key.split('_');
+            if (parts[2] === `q${q}`) {
+                maxCol = Math.max(maxCol, parseInt(parts[3]));
+            }
+        }
+    }
+    
+    const colsCount = Math.max(3, maxCol);
+    const colArray = Array.from({length: colsCount}, (_, i) => i + 1);
+    
+    const colWidth = colsCount > 8 ? '44px' : '50px';
+    const gridStyle = `grid-template-columns: 140px repeat(${colsCount}, ${colWidth}) 60px;`;
+    
+    let html = `
+        <div class="grid-row" style="${gridStyle}">
+            <div class="header-cell text-left pl-2 sticky left-0 bg-white z-10 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">Ученик</div>
+            ${colArray.map(c => `<div class="header-cell" title="Урок ${c}">У-${c}</div>`).join("")}
+            <div class="header-cell bg-blue-50 rounded-lg">Ср.б</div>
+        </div>
+    `;
+    
+    data.students.forEach((s, idx) => {
+        let sum = 0, count = 0;
+        let rowHtml = `<div class="grid-row" style="${gridStyle}">
+            <div class="name-col">
+                <span class="text-[10px] text-slate-400 font-normal mr-1">${idx+1}.</span>
+                <span>${s}</span>
+            </div>`;
+        
+        colArray.forEach(col => {
+            const key = `${subject}_${s}_q${q}_${col}`;
+            const val = data.grades[key] || "";
+            if (val && val !== 'Н' && !isNaN(parseInt(val))) { 
+                sum += parseInt(val); count++; 
+            }
+            const extraClass = val === 'Н' ? 'absent' : '';
+            
+            rowHtml += `
+                <div>
+                    <input type="text" class="grade-input ${extraClass}" value="${val}" 
+                    data-subject="${subject}" data-student="${s}" data-quarter="${q}" data-col="${col}"
+                    onfocus="this.select()" maxlength="2" autocomplete="off"
+                    placeholder="1-10">
+                </div>
+            `;
+        });
+        
+        const avg = count > 0 ? (sum/count).toFixed(1) : "-";
+        const avgColor = avg === "-" ? "text-slate-400" : (avg >= 7 ? "text-green-600" : avg >= 4 ? "text-yellow-600" : "text-red-600");
+        rowHtml += `<div class="font-black text-center text-sm ${avgColor} bg-blue-50 py-1 rounded-lg">${avg}</div></div>`;
+        html += rowHtml;
+    });
+    
+    container.innerHTML = html;
+    
+    // Клавиатурная навигация
+    setTimeout(() => {
+        const inputs = container.querySelectorAll('.grade-input');
+        const inputArray = Array.from(inputs);
+        const cols = colArray.length;
+        
+        const getIndex = (el) => inputArray.indexOf(el);
+        
+        const moveFocus = (current, deltaRow, deltaCol) => {
+            const idx = getIndex(current);
+            if (idx === -1) return;
+            const row = Math.floor(idx / cols);
+            const col = idx % cols;
+            const newRow = Math.min(Math.max(row + deltaRow, 0), Math.floor(inputArray.length / cols) - 1);
+            const newCol = Math.min(Math.max(col + deltaCol, 0), cols - 1);
+            const newIdx = newRow * cols + newCol;
+            if (newIdx >= 0 && newIdx < inputArray.length) {
+                inputArray[newIdx].focus();
+                inputArray[newIdx].select();
+            }
+        };
+        
+        inputs.forEach(inp => {
+            inp.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const val = inp.value.trim();
+                    if (val === '') {
+                        updateGrade(inp.dataset.subject, inp.dataset.student, 
+                            parseInt(inp.dataset.quarter), parseInt(inp.dataset.col), '');
+                        moveFocus(inp, 1, 0);
+                        return;
+                    }
+                    if (val.toUpperCase() === 'Н') {
+                        updateGrade(inp.dataset.subject, inp.dataset.student, 
+                            parseInt(inp.dataset.quarter), parseInt(inp.dataset.col), 'Н');
+                        moveFocus(inp, 1, 0);
+                        return;
+                    }
+                    const num = parseInt(val);
+                    if (!isNaN(num) && num >= 1 && num <= 10) {
+                        updateGrade(inp.dataset.subject, inp.dataset.student, 
+                            parseInt(inp.dataset.quarter), parseInt(inp.dataset.col), num.toString());
+                        moveFocus(inp, 1, 0);
+                    } else {
+                        inp.value = '';
+                        inp.focus();
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    moveFocus(inp, -1, 0);
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    moveFocus(inp, 1, 0);
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    moveFocus(inp, 0, 1);
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    moveFocus(inp, 0, -1);
+                } else if (e.key === 'Tab') {
+                    e.preventDefault();
+                    if (e.shiftKey) moveFocus(inp, 0, -1);
+                    else moveFocus(inp, 0, 1);
+                }
+            });
+        });
+    }, 50);
+}
+
+function updateGrade(subject, student, quarter, col, val) {
+    const key = `${subject}_${student}_q${quarter}_${col}`;
+    val = val.trim().toUpperCase();
+    
+    if (val === "" || val === "-" || val === "0") {
+        delete data.grades[key];
+    } else if (val === "Н") {
+        data.grades[key] = "Н";
+    } else {
+        const num = parseInt(val);
+        if (!isNaN(num) && num >= 1 && num <= 10) { data.grades[key] = num; } 
+        else { renderGradebook(); return; }
+    }
+    saveData(); 
+    renderGradebook();
+    renderHome();
+}
+
+function addGradeColumn() {
+    const subject = data.currentSubject;
+    const q = data.currentQuarter;
+    
+    let maxCol = 1;
+    for (const key in data.grades) {
+        if (key.startsWith(`${subject}_`)) {
+            const parts = key.split('_');
+            if (parts[2] === `q${q}`) maxCol = Math.max(maxCol, parseInt(parts[3]));
+        }
+    }
+    if (data.students.length > 0) {
+        data.grades[`${subject}_${data.students[0]}_q${q}_${maxCol + 1}`] = "";
+        saveData(); renderGradebook();
+    }
+}
+
+// ========== МОЙ КЛАСС ==========
+function renderClassroom() {
+    switchClassroomTab('students');
+    renderReportSelectors();
+    renderReportStudentList();
+}
+
+function switchClassroomTab(tab) {
+    document.querySelectorAll(".classroom-tab").forEach(el => el.classList.add("hidden"));
+    document.getElementById(`tab-${tab}`).classList.remove("hidden");
+    
+    document.querySelectorAll("#classroom-tabs .tab-btn").forEach(b => b.classList.remove("active", "shadow-sm"));
+    const activeBtn = document.querySelector(`#classroom-tabs .tab-btn[onclick*="${tab}"]`);
+    if(activeBtn) activeBtn.classList.add("active", "shadow-sm");
+    
+    if (tab === "students") renderStudentList();
+    if (tab === "progress") { renderProgress(); renderReportSelectors(); }
+    if (tab === "schedule") renderSchedule();
+    if (tab === "report") renderReportStudentList();
+}
+
+function renderStudentList() {
+    document.getElementById("students-count-label").textContent = data.students.length;
+    const container = document.getElementById("student-list");
+    
+    if (!data.students.length) {
+        container.innerHTML = `<div class="p-8 text-center text-slate-500 bg-white rounded-xl border border-dashed border-slate-200">В вашем классе пока нет учеников. Добавьте первого!</div>`;
+        return;
+    }
+    
+    container.innerHTML = data.students.map((s, i) => `
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs shadow-inner">${i+1}</div>
+                <div class="font-bold text-sm text-slate-800">${s}</div>
+            </div>
+            <button class="text-red-400 hover:text-red-600 bg-red-50 w-7 h-7 rounded-full flex items-center justify-center transition" onclick="removeStudent('${s}')">✕</button>
+        </div>
+    `).join("");
+}
+
+function openAddStudent() {
+    openModal(`
+        <h3 class="font-bold text-xl mb-4 text-slate-800">➕ Добавить ученика</h3>
+        <input type="text" id="new-student-name" class="w-full mb-5" placeholder="Фамилия Имя">
+        <div class="flex gap-3">
+            <button class="btn btn-outline flex-1" onclick="closeModal()">Отмена</button>
+            <button class="btn btn-primary flex-1" onclick="addStudent()">Добавить</button>
+        </div>
+    `);
+}
+
+function addStudent() {
+    const name = document.getElementById("new-student-name").value.trim();
+    if (name && !data.students.includes(name)) {
+        data.students.push(name);
+        data.students.sort(); 
+        saveData(); closeModal(); renderStudentList(); renderHome();
+    }
+}
+
+function removeStudent(name) {
+    openConfirmModal('Удаление', `Удалить ученика <b>${name}</b>? Оценки останутся в базе, но ученик исчезнет из списка.`, () => {
+        data.students = data.students.filter(s => s !== name);
+        saveData(); renderStudentList(); renderHome();
+    });
+}
+
+// ========== УСПЕВАЕМОСТЬ ==========
+function renderReportSelectors() {
+    const sel = document.getElementById("report-student-select");
+    if(sel) {
+        sel.innerHTML = `<option value="">-- Выберите ученика --</option>` + 
+            data.students.map(s => `<option value="${s}">${s}</option>`).join("");
+    }
+}
+
+function setProgressQuarter(q) {
+    data.progressQuarter = q;
+    renderQuarterSelectors();
+    renderProgress();
+    renderIndividualReport();
+}
+
+function getStudentAvgForSubject(student, subject, q) {
+    let sum = 0, count = 0;
+    for (const key in data.grades) {
+        if (key.startsWith(`${subject}_${student}_q${q}_`)) {
+            const val = data.grades[key];
+            if (val && val !== 'Н') {
+                const num = parseInt(val);
+                if (!isNaN(num)) { sum += num; count++; }
+            }
+        }
+    }
+    return { sum, count, avg: count > 0 ? sum/count : 0 };
+}
+
+function renderProgress() {
+    const q = data.progressQuarter;
+    const students = data.students;
+    const subjects = data.subjects;
+    
+    if(!students.length || !subjects.length) return;
+
+    let studentStats = students.map(s => ({ name: s, totalAvg: 0, sum: 0, count: 0 }));
+    let subjectStats = subjects.map(s => ({ name: s, totalAvg: 0, sum: 0, count: 0 }));
+
+    let tableHtml = `<table class="schedule-table whitespace-nowrap"><thead><tr>
+        <th class="text-left sticky left-0 z-10 bg-slate-50">Ученик</th>
+        ${subjects.map(sub => `<th title="${sub}">${sub.substring(0,4)}.</th>`).join("")}
+        <th class="bg-blue-50 text-blue-700">Ср.б</th></tr></thead><tbody>`;
+    
+    students.forEach((s, idx) => {
+        tableHtml += `<tr class="hover:bg-slate-50 transition">
+            <td class="text-left font-semibold sticky left-0 z-10 bg-white shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] text-xs">
+                <span class="text-[10px] text-slate-400 mr-1">${idx+1}.</span>${s}
+            </td>`;
+        
+        subjects.forEach((sub, subIdx) => {
+            const res = getStudentAvgForSubject(s, sub, q);
+            if(res.avg > 0) {
+                studentStats[idx].sum += res.avg; studentStats[idx].count++;
+                subjectStats[subIdx].sum += res.avg; subjectStats[subIdx].count++;
+            }
+            const color = res.avg === 0 ? "text-slate-300" : (res.avg >= 7 ? "text-green-600 font-bold" : res.avg >= 4 ? "text-yellow-600 font-bold" : "text-red-600 font-bold");
+            tableHtml += `<td class="${color}">${res.avg > 0 ? res.avg.toFixed(1) : '-'}</td>`;
+        });
+        
+        studentStats[idx].totalAvg = studentStats[idx].count > 0 ? studentStats[idx].sum / studentStats[idx].count : 0;
+        tableHtml += `<td class="font-black text-blue-600 bg-blue-50/50">${studentStats[idx].totalAvg > 0 ? studentStats[idx].totalAvg.toFixed(1) : '-'}</td></tr>`;
+    });
+    
+    tableHtml += `</tbody></table>`;
+    document.getElementById("progress-table-container").innerHTML = tableHtml;
+
+    const topStudents = studentStats.filter(st => st.totalAvg > 0).sort((a,b) => b.totalAvg - a.totalAvg);
+    document.getElementById("top-students-list").innerHTML = topStudents.length ? 
+        topStudents.slice(0, 10).map((st, i) => `<div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg text-sm"><span class="font-medium">${i+1}. ${st.name}</span><span class="font-bold text-blue-600">${st.totalAvg.toFixed(2)}</span></div>`).join("") :
+        `<div class="text-xs text-slate-400">Нет оценок</div>`;
+
+    subjectStats.forEach(sub => sub.totalAvg = sub.count > 0 ? sub.sum / sub.count : 0);
+    const topSubjects = subjectStats.filter(sub => sub.totalAvg > 0).sort((a,b) => b.totalAvg - a.totalAvg);
+    document.getElementById("top-subjects-list").innerHTML = topSubjects.length ? 
+        topSubjects.map((sub, i) => `<div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg text-sm"><span class="font-medium">${i+1}. ${sub.name}</span><span class="font-bold text-indigo-600">${sub.totalAvg.toFixed(2)}</span></div>`).join("") :
+        `<div class="text-xs text-slate-400">Нет оценок</div>`;
+}
+
+function renderIndividualReport() {
+    const student = document.getElementById("report-student-select").value;
+    const container = document.getElementById("individual-report-container");
+    const q = data.progressQuarter;
+    
+    if(!student) {
+        container.innerHTML = `<div class="text-center py-6 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-sm">Выберите ученика из списка выше.</div>`;
+        return;
+    }
+
+    let html = `<table class="w-full text-left text-sm border-collapse"><thead class="bg-slate-50 border-b border-slate-200"><th class="p-2 font-bold text-slate-600">Предмет</th><th class="p-2 font-bold text-slate-600 text-center">Ср. балл</th><th class="p-2 font-bold text-slate-600 text-center">Выходит</th><th class="p-2 font-bold text-blue-600">🤖 Совет ИИ</th></thead><tbody>`;
+    
+    data.subjects.forEach(sub => {
+        const res = getStudentAvgForSubject(student, sub, q);
+        let currentAvg = res.avg;
+        if(currentAvg === 0) {
+            html += `<tr class="border-b border-slate-100 last:border-0"><td class="p-2 font-medium">${sub}</td><td class="p-2 text-center text-slate-400">-</td><td class="p-2 text-center text-slate-400">-</td><td class="p-2 text-xs text-slate-400">Нет оценок</td></tr>`;
+            return;
+        }
+
+        let rounded = Math.round(currentAvg);
+        let advice = `<span class="text-green-600">Все отлично!</span>`;
+        
+        let target = Math.floor(currentAvg) + 1;
+        if (target <= 10 && currentAvg < target - 0.5) { 
+            const requiredAvg = target - 0.5;
+            let adviceGrades = [];
+            
+            if ((res.sum + 10) / (res.count + 1) >= requiredAvg) {
+                for(let g=1; g<=10; g++) {
+                    if((res.sum + g)/(res.count + 1) >= requiredAvg) { adviceGrades = [g]; break; }
+                }
+            } 
+            else if ((res.sum + 20) / (res.count + 2) >= requiredAvg) {
+                for(let g=1; g<=10; g++) {
+                    if((res.sum + g + 10)/(res.count + 2) >= requiredAvg) { adviceGrades = [g, 10]; break; }
+                }
+            }
+
+            if(adviceGrades.length > 0) {
+                advice = `<span class="text-orange-500 font-medium">Получи <b>${adviceGrades.join(', ')}</b> для ${target}</span>`;
+            } else {
+                advice = `<span class="text-slate-400">Тяжело поднять до ${target}</span>`;
+            }
+        }
+
+        const color = currentAvg >= 7 ? "text-green-600" : currentAvg >= 4 ? "text-yellow-600" : "text-red-600";
+        html += `<tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+            <td class="p-2 font-medium text-slate-700">${sub}</td>
+            <td class="p-2 text-center font-bold ${color}">${currentAvg.toFixed(2)}</td>
+            <td class="p-2 text-center font-black bg-blue-50/50 rounded">${rounded}</td>
+            <td class="p-2 text-xs">${advice}</td>
+        </tr>`;
+    });
+    
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+
+function printReport() { window.print(); }
+
+// ========== РАСПИСАНИЕ ==========
+function renderSchedule() {
+    const container = document.getElementById("schedule-content");
+    const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+    
+    let html = "";
+    days.forEach((dayName, dayIdx) => {
+        const lessons = data.schedule.filter(l => l.day === dayIdx).sort((a,b) => a.time.localeCompare(b.time));
+        if (lessons.length > 0) {
+            html += `
+                <div class="card p-0 overflow-hidden shadow-sm border border-slate-200">
+                    <div class="bg-slate-100 px-4 py-2 font-bold text-slate-700 border-b border-slate-200">${dayName}</div>
+                    <div class="divide-y divide-slate-100">
+                        ${lessons.map((l, i) => `
+                            <div class="flex justify-between items-center px-4 py-3 hover:bg-slate-50 transition">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-bold text-slate-400 w-10">${l.time}</span>
+                                    <span class="font-semibold text-slate-800">${l.subject}</span>
+                                </div>
+                                <button onclick="removeSchedule(${dayIdx}, '${l.time}')" class="text-red-400 hover:text-red-600 bg-red-50 w-6 h-6 rounded-md flex items-center justify-center transition">✕</button>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+            `;
+        }
+    });
+    
+    if (!html) html = `<div class="text-center py-8 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">Расписание пусто</div>`;
+    container.innerHTML = html;
+}
+
+function openAddSchedule() {
+    const subOpts = data.subjects.map(s => `<option value="${s}">${s}</option>`).join("");
+    openModal(`
+        <h3 class="font-bold text-xl mb-4 text-slate-800">➕ Добавить урок</h3>
+        <select id="sch-day" class="w-full mb-3 font-semibold">
+            <option value="0">Понедельник</option><option value="1">Вторник</option>
+            <option value="2">Среда</option><option value="3">Четверг</option>
+            <option value="4">Пятница</option><option value="5">Суббота</option>
+        </select>
+        <input type="time" id="sch-time" class="w-full mb-3" value="08:00">
+        <select id="sch-subject" class="w-full mb-5 font-semibold">${subOpts}</select>
+        <div class="flex gap-3">
+            <button class="btn btn-outline flex-1" onclick="closeModal()">Отмена</button>
+            <button class="btn btn-primary flex-1" onclick="addSchedule()">Добавить</button>
+        </div>
+    `);
+}
+
+function addSchedule() {
+    const day = parseInt(document.getElementById("sch-day").value);
+    const time = document.getElementById("sch-time").value;
+    const subject = document.getElementById("sch-subject").value;
+    
+    data.schedule = data.schedule.filter(l => !(l.day === day && l.time === time));
+    data.schedule.push({ day, time, subject });
+    
+    saveData(); closeModal(); renderSchedule(); renderCalendar();
+}
+
+function removeSchedule(day, time) {
+    data.schedule = data.schedule.filter(l => !(l.day === day && l.time === time));
+    saveData(); renderSchedule(); renderCalendar();
+}
+
+// ========== НАСТРОЙКИ ==========
+function renderSettings() {
+    document.getElementById("subject-list-settings").innerHTML = data.subjects.map((s, i) =>
+        `<span class="badge badge-green text-xs py-1 px-3 flex items-center gap-2">${s} <button onclick="removeSubject(${i})" class="text-green-600 hover:text-red-500">✕</button></span>`
+    ).join("");
+}
+
+function addSubject() {
+    const s = document.getElementById("new-subject-input").value.trim();
+    if (s && !data.subjects.includes(s)) {
+        data.subjects.push(s); document.getElementById("new-subject-input").value = "";
+        saveData(); renderSettings(); renderSelects();
+    }
+}
+
+function removeSubject(idx) {
+    if(confirm(`Удалить предмет ${data.subjects[idx]}?`)) {
+        data.subjects.splice(idx, 1); saveData(); renderSettings(); renderSelects();
+    }
+}
+
+function exportData() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    const a = document.createElement("a");
+    a.href = dataStr;
+    a.download = `my_class_backup_${new Date().toISOString().split("T")[0]}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const imported = JSON.parse(e.target.result);
+            if (imported && typeof imported === 'object') {
+                data = imported; saveData();
+                alert("Данные успешно загружены!"); location.reload();
+            }
+        } catch (err) { alert("Ошибка чтения файла. Проверьте формат .json"); }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+}
+
+function confirmResetAll() {
+    openConfirmModal('Сброс данных', 'Это действие безвозвратно удалит всех учеников, оценки и расписание. Продолжить?', () => {
+        localStorage.removeItem("teacher_pro_v9");
+        location.reload();
+    });
+}
+
+// ========== ТАБЕЛЬ ДЛЯ РОДИТЕЛЕЙ (только выбранная четверть) ==========
+function renderReportStudentList() {
+    const container = document.getElementById("report-student-list");
+    if (!container) return;
+    
+    if (!data.students.length) {
+        container.innerHTML = `<div class="col-span-full text-center text-slate-400 py-4">Нет учеников</div>`;
+        return;
+    }
+    
+    container.innerHTML = data.students.map(s => `
+        <button class="p-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium hover:bg-blue-50 hover:border-blue-300 transition truncate" onclick="renderReportCard('${s}')">
+            ${s}
+        </button>
+    `).join("");
+    
+    if (data.students.length) {
+        renderReportCard(data.students[0]);
+    }
+}
+
+function renderReportCard(student) {
+    const container = document.getElementById("report-card-container");
+    if (!container) return;
+    
+    const subjects = data.subjects;
+    const currentQ = data.reportQuarter || 1;
+    
+    let rows = [];
+    let totalSum = 0, totalCount = 0;
+    
+    subjects.forEach(sub => {
+        // Получаем все оценки за выбранную четверть
+        let grades = [];
+        for (const key in data.grades) {
+            if (key.startsWith(`${sub}_${student}_q${currentQ}_`)) {
+                const val = data.grades[key];
+                if (val && val !== 'Н') {
+                    const num = parseInt(val);
+                    if (!isNaN(num)) grades.push(num);
+                } else if (val === 'Н') {
+                    grades.push('Н');
+                }
+            }
+        }
+        
+        // Вычисляем средний балл по предмету
+        const nums = grades.filter(v => typeof v === 'number');
+        let avg = nums.length > 0 ? (nums.reduce((a,b) => a+b, 0) / nums.length).toFixed(1) : '-';
+        if (avg !== '-') {
+            totalSum += parseFloat(avg);
+            totalCount++;
+        }
+        
+        rows.push({ 
+            subject: sub, 
+            grades: grades,
+            avg: avg 
+        });
+    });
+    
+    let overallAvg = totalCount > 0 ? (totalSum / totalCount).toFixed(2) : '-';
+    
+    // Переключатель четвертей
+    let quarterSelector = `
+        <div class="quarter-selector">
+            ${[1,2,3,4].map(q => `
+                <button class="${q === currentQ ? 'active' : ''}" onclick="setReportQuarter(${q}, '${student}')">
+                    ${q} четверть
+                </button>
+            `).join('')}
+        </div>
+    `;
+    
+    let tableHtml = `
+        <div class="report-card card mt-4">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <div>
+                    <h3 class="font-bold text-xl text-slate-800">📄 Табель успеваемости</h3>
+                    <p class="text-sm text-slate-500">Ученик: <span class="font-bold text-slate-700">${student}</span></p>
+                    <p class="text-sm text-slate-500">Четверть: <span class="font-bold text-blue-600">${currentQ}</span></p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-slate-500">${new Date().toLocaleDateString('ru-RU')}</p>
+                </div>
+            </div>
+            
+            ${quarterSelector}
+            
+            <div class="overflow-x-auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="min-width:140px;">Предмет</th>
+                            <th>Отметки</th>
+                            <th style="background:#e0e7ff;">Ср.балл</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+    
+    rows.forEach(row => {
+        let avgDisplay = row.avg;
+        let avgColor = avgDisplay === '-' ? 'none' : (parseFloat(avgDisplay) >= 7 ? 'good' : parseFloat(avgDisplay) >= 4 ? 'ok' : 'bad');
+        
+        let displayGrades = row.grades.map(g => {
+            if (g === 'Н') return `<span class="grade-cell-table absent">Н</span>`;
+            let color = g >= 7 ? 'good' : g >= 4 ? 'ok' : 'bad';
+            return `<span class="grade-cell-table ${color}">${g}</span>`;
+        }).join(' ');
+        
+        tableHtml += `<tr>
+            <td class="subject-col">${row.subject}</td>
+            <td style="font-size:13px;">${displayGrades || '<span class="grade-cell-table none">-</span>'}</td>
+            <td style="background:#f0f4ff; font-weight:700;"><span class="grade-cell-table ${avgColor}">${avgDisplay}</span></td>
+        </tr>`;
+    });
+    
+    tableHtml += `
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td style="font-weight:800;">Итоговый средний балл</td>
+                            <td></td>
+                            <td style="font-weight:900; color:#2563eb; background:#e0e7ff; font-size:1.1rem;">${overallAvg}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            
+            <div class="mt-4 text-xs text-slate-400 flex justify-between items-center border-t pt-3">
+                <span>* Показаны все отметки за выбранную четверть</span>
+                <span>Средний балл = среднее арифметическое всех оценок</span>
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = tableHtml;
+}
+
+function setReportQuarter(q, student) {
+    data.reportQuarter = q;
+    saveData();
+    renderReportCard(student);
+}
+
+function printReportCard() {
+    const container = document.getElementById("report-card-container");
+    if (!container || !container.innerHTML.trim()) {
+        alert("Нет данных для печати. Выберите ученика.");
+        return;
+    }
+    window.print();
+}
+
+function exportReportCard() {
+    const container = document.getElementById("report-card-container");
+    if (!container || !container.innerHTML.trim()) {
+        alert("Нет данных для экспорта. Выберите ученика.");
+        return;
+    }
+    
+    const studentName = container.querySelector('.report-card .font-bold.text-slate-700')?.textContent || 'ученик';
+    const htmlContent = `
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Табель - ${studentName}</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 40px; color: #333; }
+                table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+                th, td { padding: 8px 12px; border: 1px solid #ccc; text-align: center; }
+                th { background: #f1f5f9; font-weight: 700; }
+                .total-row { background: #eff6ff; font-weight: 700; }
+                .grade-cell-table { display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: 700; min-width: 28px; font-size: 13px; margin: 1px; }
+                .grade-cell-table.good { background: #dcfce7; color: #166534; }
+                .grade-cell-table.ok { background: #fef3c7; color: #92400e; }
+                .grade-cell-table.bad { background: #fee2e2; color: #991b1b; }
+                .grade-cell-table.none { background: #f1f5f9; color: #94a3b8; }
+                .grade-cell-table.absent { background: #e2e8f0; color: #64748b; }
+                .report-card { max-width: 900px; margin: 0 auto; }
+                .header { display: flex; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 12px; margin-bottom: 20px; }
+                .footer { margin-top: 20px; font-size: 12px; color: #888; border-top: 1px solid #ddd; padding-top: 12px; }
+                .subject-col { text-align: left; font-weight: 500; }
+                .quarter-selector { display: flex; gap: 6px; margin: 12px 0; flex-wrap: wrap; }
+                .quarter-selector button { padding: 4px 14px; border-radius: 8px; border: 2px solid #e2e8f0; background: white; font-weight: 600; font-size: 13px; cursor: default; }
+                .quarter-selector button.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+            </style>
+        </head>
+        <body>
+            <div class="report-card">
+                ${container.innerHTML}
+            </div>
+            <div class="footer">
+                <p>Сформировано: ${new Date().toLocaleDateString('ru-RU')} | Учительский журнал PRO</p>
+            </div>
+        </body>
+        </html>
+    `;
+    
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Табель_${studentName.replace(/\s+/g, '_')}_${data.reportQuarter}четверть.html`;
+    link.click();
+}
+
+document.addEventListener("DOMContentLoaded", init);
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Журнал 2026/2027 — Редактируемый список</title>
+    
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+        tr { height: 44px !important; }
+        td, th {
+            height: 44px !important;
+            padding: 0 12px !important;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+        }
+        .name-col {
+            position: sticky;
+            left: 0;
+            background: white;
+            z-index: 20;
+            min-width: 320px;
+            max-width: 320px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 700;
+            box-shadow: 4px 0 8px -2px rgba(0,0,0,0.1);
+        }
+        .att-cell {
+            min-width: 56px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 800;
+            position: relative;
+            transition: all 0.1s;
+        }
+        .att-cell:active { transform: scale(0.95); background-color: #e2e8f0; }
+        
+        .no-doc {
+            box-shadow: inset 0 0 0 3px #ef4444 !important;
+        }
+        .has-doc::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            font-size: 12px;
+            color: #059669;
+            text-shadow: 0 0 2px white;
+        }
+        .header-cell {
+            background: #e2e8f0;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 800;
+            color: #334155;
+            text-transform: uppercase;
+        }
+        .summary-cell {
+            min-width: 40px;
+            font-size: 12px;
+            font-weight: 800;
+            text-align: center;
+        }
+        .pdf-mode .no-print { display: none !important; }
+        .pdf-mode .name-col { position: static !important; box-shadow: none !important; }
+        
+        ::-webkit-scrollbar { height: 12px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+
+        .edit-input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px dashed #94a3b8;
+            font-weight: 700;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+            padding: 4px 0;
+            color: #1e293b;
+        }
+        .edit-input:focus {
+            border-bottom-color: #3b82f6;
+        }
+        .student-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 6px;
+        }
+        .student-item:hover {
+            background: #f1f5f9;
+        }
+        .delete-btn {
+            color: #ef4444;
+            font-weight: 900;
+            font-size: 18px;
+            line-height: 1;
+            padding: 0 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: none;
+            border: none;
+        }
+        .delete-btn:hover {
+            transform: scale(1.3);
+            color: #b91c1c;
+        }
+        .add-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 18px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .add-btn:hover {
+            background: #2563eb;
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // ДАТЫ ЗАНЯТИЙ: 2026/2027 учебный год (сентябрь 2026 – май 2027)
+        // Формируем массив учебных месяцев (сентябрь-май)
+        const ACADEMIC_MONTHS = [
+            { label: "Сентябрь", year: 2026, month: 8 },
+            { label: "Октябрь", year: 2026, month: 9 },
+            { label: "Ноябрь", year: 2026, month: 10 },
+            { label: "Декабрь", year: 2026, month: 11 },
+            { label: "Январь", year: 2027, month: 0 },
+            { label: "Февраль", year: 2027, month: 1 },
+            { label: "Март", year: 2027, month: 2 },
+            { label: "Апрель", year: 2027, month: 3 },
+            { label: "Май", year: 2027, month: 4 }
+        ];
+
+        // Начальные ученики (можно менять)
+        const DEFAULT_STUDENTS = [
+            "Авсяникова Марина Александровна", "Бабичев Алексей Даниилович", "Баженова Мирослава Андреевна",
+            "Бежелев Арсений Евгеньевич", "Былицкая Виктория Сергеевна", "Жиренкова Вера Михайловна",
+            "Жуков Илья Юрьевич", "Ибрагимова Вероника Вячеславовна", "Иванова Александра Евгеньевна",
+            "Кастунова Ульяна Андреевна", "Конон Мария Дмитриевна", "Курбацкий Олег Вадимович",
+            "Милка Владислав Леонидович", "Посульченко Василиса Александровна", "Обухов Арсений Андреевич",
+            "Протираев Никита Владимирович", "Савицкая Полина Павловна", "Тарасенко Карина Витальевна",
+            "Татаринов Кирилл Александрович", "Усенкова Мария Максимовна", "Филимонова Екатерина Андреевна",
+            "Шепалова Вероника Сергеевна"
+        ];
+
+        const App = () => {
+            // Список учеников (сохраняем в localStorage)
+            const [students, setStudents] = useState(() => {
+                const saved = localStorage.getItem('students_v12');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        if (Array.isArray(parsed) && parsed.length) return parsed;
+                    } catch (e) {}
+                }
+                return DEFAULT_STUDENTS;
+            });
+
+            const [activeMonth, setActiveMonth] = useState(0);
+            const [viewMode, setViewMode] = useState('journal'); 
+            const [attendance, setAttendance] = useState(() => JSON.parse(localStorage.getItem('att_v12') || "{}"));
+            const [docs, setDocs] = useState(() => JSON.parse(localStorage.getItem('docs_v12') || "{}"));
+            const [homeSchooled, setHomeSchooled] = useState(() => JSON.parse(localStorage.getItem('hs_v12') || "[]"));
+            const [isExporting, setIsExporting] = useState(false);
+            const [editMode, setEditMode] = useState(false);
+            const [newName, setNewName] = useState('');
+
+            // При изменении students обновляем localStorage
+            useEffect(() => {
+                localStorage.setItem('students_v12', JSON.stringify(students));
+            }, [students]);
+
+            useEffect(() => {
+                localStorage.setItem('att_v12', JSON.stringify(attendance));
+                localStorage.setItem('docs_v12', JSON.stringify(docs));
+                localStorage.setItem('hs_v12', JSON.stringify(homeSchooled));
+            }, [attendance, docs, homeSchooled]);
+
+            // Генерация учебных дней для выбранного месяца
+            const daysInMonth = useMemo(() => {
+                const dates = [];
+                const { year, month } = ACADEMIC_MONTHS[activeMonth];
+                const start = new Date(year, month, 1);
+                const end = new Date(year, month + 1, 0);
+                // Исключаем субботу и воскресенье
+                for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                    const day = d.getDay();
+                    if (day !== 0 && day !== 6) {
+                        dates.push(new Date(d));
+                    }
+                }
+                return dates;
+            }, [activeMonth]);
+
+            // Обработчики кликов
+            const handleCellClick = (sIdx, date) => {
+                if (homeSchooled.includes(sIdx)) return;
+                const key = `${sIdx}-${date.getTime()}`;
+                const current = attendance[key] || "П";
+                const states = ["П", "З", "С", "Ос", "Оз"];
+                const next = states[(states.indexOf(current) + 1) % states.length];
+                const newAtt = {...attendance, [key]: next};
+                const newDocs = {...docs};
+                if (next === "П") {
+                    delete newDocs[key];
+                }
+                setAttendance(newAtt);
+                setDocs(newDocs);
+            };
+
+            const handleCellDoubleClick = (sIdx, date) => {
+                if (homeSchooled.includes(sIdx)) return;
+                const key = `${sIdx}-${date.getTime()}`;
+                const currentStatus = attendance[key] || "П";
+                if (currentStatus === "П") return;
+                setDocs(prev => ({ ...prev, [key]: !prev[key] }));
+            };
+
+            const toggleDocStatus = (key) => {
+                setDocs(prev => ({...prev, [key]: !prev[key]}));
+            };
+
+            const markAllDocsForStudent = (sIdx) => {
+                const newDocs = {...docs};
+                let count = 0;
+                daysInMonth.forEach(d => {
+                    const key = `${sIdx}-${d.getTime()}`;
+                    if (attendance[key] && attendance[key] !== 'П' && !docs[key]) {
+                        newDocs[key] = true;
+                        count++;
+                    }
+                });
+                if (count > 0 && window.confirm(`Отметить все справки (${count}) как сданные?`)) {
+                    setDocs(newDocs);
+                }
+            };
+
+            const toggleHS = (sIdx) => {
+                setHomeSchooled(prev => prev.includes(sIdx) ? prev.filter(i => i !== sIdx) : [...prev, sIdx]);
+            };
+
+            const getStats = (sIdx) => {
+                const stats = { З:0, С:0, Ос:0, Оз:0, missingDocs: 0 };
+                daysInMonth.forEach(d => {
+                    const key = `${sIdx}-${d.getTime()}`;
+                    const v = attendance[key];
+                    if (["З", "С", "Ос", "Оз"].includes(v)) {
+                        stats[v]++;
+                        if (!docs[key]) stats.missingDocs++;
+                    }
+                });
+                return stats;
+            };
+
+            const exportToPDF = () => {
+                setIsExporting(true);
+                const element = document.getElementById('journal-table-container');
+                const opt = {
+                    margin: [5, 2, 5, 2],
+                    filename: `Журнал_2026-2027_${ACADEMIC_MONTHS[activeMonth].label}.pdf`,
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                    html2canvas: { scale: 2 }
+                };
+                document.body.classList.add('pdf-mode');
+                html2pdf().set(opt).from(element).save().then(() => {
+                    document.body.classList.remove('pdf-mode');
+                    setIsExporting(false);
+                });
+            };
+
+            const totalMissingDocs = students.reduce((acc, _, i) => acc + getStats(i).missingDocs, 0);
+
+            // Добавление ученика
+            const addStudent = () => {
+                const trimmed = newName.trim();
+                if (trimmed === '') return;
+                setStudents(prev => [...prev, trimmed]);
+                setNewName('');
+            };
+
+            // Удаление ученика
+            const deleteStudent = (idx) => {
+                if (window.confirm(`Удалить "${students[idx]}"? Все данные по этому ученику будут потеряны.`)) {
+                    // Удаляем все записи, связанные с этим индексом, и сдвигаем индексы
+                    const newAtt = {};
+                    const newDocs = {};
+                    const newHS = homeSchooled
+                        .map(h => h > idx ? h - 1 : (h === idx ? -1 : h))
+                        .filter(h => h >= 0);
+
+                    // Переносим данные для учеников с индексом > idx
+                    students.forEach((_, i) => {
+                        if (i === idx) return;
+                        const newIdx = i > idx ? i - 1 : i;
+                        daysInMonth.forEach(d => {
+                            const oldKey = `${i}-${d.getTime()}`;
+                            const newKey = `${newIdx}-${d.getTime()}`;
+                            if (attendance[oldKey]) newAtt[newKey] = attendance[oldKey];
+                            if (docs[oldKey]) newDocs[newKey] = docs[oldKey];
+                        });
+                    });
+
+                    setAttendance(newAtt);
+                    setDocs(newDocs);
+                    setHomeSchooled(newHS);
+                    setStudents(prev => prev.filter((_, i) => i !== idx));
+                }
+            };
+
+            return (
+                <div className="flex flex-col h-screen overflow-hidden bg-white text-slate-900">
+                    {/* Верхняя панель */}
+                    <div className="bg-slate-900 text-white p-3 flex flex-wrap justify-between items-center no-print shadow-xl gap-2">
+                        <div className="flex items-center gap-4">
+                            <span className="font-black text-base uppercase tracking-wider">Журнал 2026/2027</span>
+                            <span className="text-[10px] text-blue-400 font-bold uppercase hidden sm:inline">1 клик - статус | 2 клика - справка</span>
+                        </div>
+                        <div className="flex gap-1 overflow-x-auto no-scrollbar">
+                            {ACADEMIC_MONTHS.map((m, i) => (
+                                <button key={i} onClick={() => setActiveMonth(i)} 
+                                    className={`px-3 py-2 rounded-xl text-[10px] font-black whitespace-nowrap transition-all ${activeMonth === i ? 'bg-blue-600 shadow-lg' : 'bg-slate-800 hover:bg-slate-700'}`}>
+                                    {m.label}
+                                </button>
+                            ))}
+                        </div>
+                        <button 
+                            onClick={() => setEditMode(!editMode)}
+                            className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-2xl text-[11px] font-black uppercase transition-all"
+                        >
+                            {editMode ? '✕ Закрыть' : '✎ Правка списка'}
+                        </button>
+                    </div>
+
+                    {/* Режим редактирования списка */}
+                    {editMode && (
+                        <div className="bg-slate-100 p-4 border-b-2 border-slate-300 no-print">
+                            <div className="max-w-2xl mx-auto">
+                                <div className="flex gap-2 mb-3">
+                                    <input 
+                                        type="text" 
+                                        value={newName}
+                                        onChange={e => setNewName(e.target.value)}
+                                        placeholder="Введите ФИО нового ученика"
+                                        className="flex-1 px-4 py-2 rounded-2xl border-2 border-slate-300 focus:border-blue-500 outline-none font-bold"
+                                        onKeyDown={e => e.key === 'Enter' && addStudent()}
+                                    />
+                                    <button onClick={addStudent} className="add-btn">➕ Добавить</button>
+                                </div>
+                                <div className="max-h-60 overflow-y-auto space-y-1 pr-2">
+                                    {students.map((name, idx) => (
+                                        <div key={idx} className="student-item">
+                                            <span className="text-slate-400 font-bold text-xs w-6">{idx+1}.</span>
+                                            <span className="flex-1 font-bold text-slate-800 truncate">{name}</span>
+                                            <button onClick={() => deleteStudent(idx)} className="delete-btn" title="Удалить">✕</button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="text-xs text-slate-400 mt-2 italic">* Удаление ученика удалит все его данные за все месяцы.</div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Переключатель режимов */}
+                    <div className="bg-slate-200 p-2 flex gap-2 no-print">
+                        <button onClick={() => setViewMode('journal')} className={`flex-1 py-3 rounded-2xl text-[11px] font-black uppercase transition-all shadow-sm ${viewMode === 'journal' ? 'bg-white text-slate-900' : 'text-slate-500'}`}>
+                            📓 Таблица Журнала
+                        </button>
+                        <button onClick={() => setViewMode('docs')} className={`flex-1 py-3 rounded-2xl text-[11px] font-black uppercase transition-all shadow-sm flex items-center justify-center gap-2 ${viewMode === 'docs' ? 'bg-white text-slate-900' : 'text-slate-500'}`}>
+                            📄 Долги {totalMissingDocs > 0 && <span className="bg-red-600 text-white px-2 py-0.5 rounded-full text-[10px]">{totalMissingDocs}</span>}
+                        </button>
+                    </div>
+
+                    {/* Основная таблица */}
+                    <div id="journal-table-container" className="flex-1 overflow-auto bg-white">
+                        {viewMode === 'journal' ? (
+                            <table className="border-collapse min-w-max">
+                                <thead>
+                                    <tr>
+                                        <th className="name-col header-cell">ФИО Ученика</th>
+                                        <th className="summary-cell header-cell text-yellow-700">З</th>
+                                        <th className="summary-cell header-cell text-green-700">С</th>
+                                        <th className="summary-cell header-cell text-blue-700">Ос</th>
+                                        <th className="summary-cell header-cell text-purple-700">Оз</th>
+                                        <th className="summary-cell header-cell text-red-600">Долг</th>
+                                        {daysInMonth.map((d, i) => (
+                                            <th key={i} className="header-cell">
+                                                <div className="text-[8px] opacity-60">{['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][d.getDay()]}</div>
+                                                <div className="text-sm font-black">{d.getDate()}</div>
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {students.map((name, sIdx) => {
+                                        const isHS = homeSchooled.includes(sIdx);
+                                        const s = getStats(sIdx);
+                                        return (
+                                            <tr key={sIdx} className="hover:bg-blue-50/30">
+                                                <td className="name-col px-4 flex items-center justify-between">
+                                                    <span className={`${isHS ? 'text-slate-300 italic font-normal' : 'text-slate-800'}`}>{sIdx + 1}. {name}</span>
+                                                    <button onClick={() => toggleHS(sIdx)} className="no-print ml-2 px-2 py-1 rounded text-[10px] bg-slate-100 text-slate-400 font-black uppercase hover:bg-orange-500 hover:text-white transition-all">ДО</button>
+                                                </td>
+                                                <td className="summary-cell text-yellow-800 bg-yellow-50/40">{isHS ? '-' : (s.З || '')}</td>
+                                                <td className="summary-cell text-green-800 bg-green-50/40">{isHS ? '-' : (s.С || '')}</td>
+                                                <td className="summary-cell text-blue-800 bg-blue-50/40">{isHS ? '-' : (s.Ос || '')}</td>
+                                                <td className="summary-cell text-purple-800 bg-purple-50/40">{isHS ? '-' : (s.Оз || '')}</td>
+                                                <td className={`summary-cell font-black ${s.missingDocs > 0 ? 'text-red-600 bg-red-50' : 'text-slate-200'}`}>
+                                                    {isHS ? '-' : (s.missingDocs || '0')}
+                                                </td>
+                                                {daysInMonth.map((d, i) => {
+                                                    const key = `${sIdx}-${d.getTime()}`;
+                                                    const val = isHS ? 'ДО' : (attendance[key] || 'П');
+                                                    const hasDoc = docs[key];
+                                                    const isMissing = !isHS && val !== 'П' && !hasDoc;
+                                                    
+                                                    const colors = {
+                                                        'П': 'text-slate-100',
+                                                        'З': 'bg-yellow-100/30 text-yellow-700',
+                                                        'С': 'bg-green-100/30 text-green-700',
+                                                        'Ос': 'bg-blue-100/30 text-blue-700',
+                                                        'Оз': 'bg-purple-100/30 text-purple-700',
+                                                        'ДО': 'bg-slate-100 text-slate-300 italic font-normal'
+                                                    };
+
+                                                    return (
+                                                        <td key={i} 
+                                                            onClick={() => handleCellClick(sIdx, d)} 
+                                                            onDoubleClick={() => handleCellDoubleClick(sIdx, d)}
+                                                            className={`att-cell border-r ${colors[val]} ${isMissing ? 'no-doc' : ''} ${hasDoc ? 'has-doc' : ''}`}>
+                                                            {val}
+                                                        </td>
+                                                    );
+                                                })}
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <div className="p-6 max-w-3xl mx-auto">
+                                <h3 className="font-black text-slate-900 uppercase text-lg mb-6 border-b-4 border-slate-900 pb-3 flex justify-between items-end">
+                                    <span>Задолженности по справкам</span>
+                                    <span className="text-[10px] text-slate-400 normal-case font-bold italic tracking-tight">Клик по числу, чтобы подтвердить сдачу</span>
+                                </h3>
+                                {students.map((name, sIdx) => {
+                                    const missingList = [];
+                                    daysInMonth.forEach(d => {
+                                        const key = `${sIdx}-${d.getTime()}`;
+                                        if (attendance[key] && attendance[key] !== 'П' && !docs[key]) {
+                                            missingList.push({date: d.getDate(), key: key});
+                                        }
+                                    });
+
+                                    if (missingList.length === 0) return null;
+
+                                    return (
+                                        <div key={sIdx} className="mb-6 p-5 rounded-3xl bg-white border-2 border-slate-100 shadow-md">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] text-red-500 font-black uppercase mb-1">Должник №{sIdx + 1}</span>
+                                                    <div className="font-black text-slate-900 text-lg leading-tight">{name}</div>
+                                                </div>
+                                                <button 
+                                                    onClick={() => markAllDocsForStudent(sIdx)}
+                                                    className="bg-slate-900 text-white px-4 py-2 rounded-2xl text-[10px] font-black uppercase hover:bg-blue-600 transition-all shadow-md active:scale-95">
+                                                    Сдано всё
+                                                </button>
+                                            </div>
+                                            <div className="flex flex-wrap gap-3">
+                                                {missingList.map((m, idx) => (
+                                                    <button 
+                                                        key={idx}
+                                                        onClick={() => toggleDocStatus(m.key)}
+                                                        className="px-4 py-3 bg-red-50 border-2 border-red-100 text-red-700 rounded-2xl text-sm font-black hover:bg-green-600 hover:text-white hover:border-green-600 transition-all shadow-sm flex flex-col items-center">
+                                                        <span className="text-[8px] opacity-60 uppercase mb-1">Число</span>
+                                                        {m.date}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                {totalMissingDocs === 0 && (
+                                    <div className="text-center py-32 flex flex-col items-center">
+                                        <div className="text-6xl mb-6">🎯</div>
+                                        <div className="text-slate-400 font-black uppercase tracking-[0.2em] text-sm">Идеально! Долгов нет</div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    
+                    {/* Нижняя панель */}
+                    <div className="p-4 bg-slate-900 text-white no-print flex flex-wrap justify-between items-center gap-2">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[9px] font-black uppercase text-blue-400 tracking-wider">Подсказка управления:</span>
+                            <div className="flex flex-wrap gap-3 text-[8px] font-bold text-slate-400 uppercase">
+                                <span><strong className="text-white">1 Клик:</strong> Смена (З/С/Ос/Оз)</span>
+                                <span><strong className="text-white">2 Клика:</strong> Сдана справка (✓)</span>
+                            </div>
+                        </div>
+                        <button onClick={exportToPDF} disabled={isExporting} className="bg-white text-slate-900 px-8 py-3 rounded-2xl text-[11px] font-black uppercase shadow-xl hover:bg-blue-400 hover:text-white transition-all active:scale-95">
+                            {isExporting ? 'Создание PDF...' : 'Скачать PDF'}
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

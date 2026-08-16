@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+
+    <!-- PWA НАСТРОЙКИ -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Журнал">
+    <link rel="apple-touch-icon" href="/icons/launchericon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/launchericon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/launchericon-512.png">
+
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Электронный журнал учителя</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter for UI, Plus Jakarta Sans for Headers -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f5ff',
+                            100: '#e5edff',
+                            200: '#cddbfe',
+                            300: '#a4bffe',
+                            400: '#7698fe',
+                            500: '#4f6ffe',
+                            600: '#3247f5',
+                            700: '#2530e1',
+                            800: '#2028b6',
+                            900: '#1e2690',
+                            950: '#111554',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.5s ease-out forwards',
+                        'fade-in': 'fadeIn 0.3s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: 0, transform: 'translateY(20px)' },
+                            '100%': { opacity: 1, transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: 0 },
+                            '100%': { opacity: 1 },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Glassmorphism utilities */
+        .glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .glass-dark {
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Ambient Background Background */
+        body {
+            background-color: #f8fafc;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,0.03) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,0.03) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,0.03) 0, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Card Hover Effects */
+        .module-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: inherit;
+            padding: 2px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.1));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .module-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0,0,0,0.02);
+        }
+        .module-card:hover::before {
+            opacity: 1;
+        }
+        .module-card:active {
+            transform: scale(0.98);
+        }
+
+        /* Icon Container Animations */
+        .module-card:hover .icon-container {
+            transform: scale(1.1) rotate(5deg);
+        }
+        .icon-container {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Staggered Animation Delays */
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-500 { animation-delay: 500ms; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col relative overflow-x-hidden selection:bg-brand-200 selection:text-brand-900">
+
+    <!-- Ambient decorative blobs -->
+    <div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-brand-300/20 blur-[120px] -z-10 animate-float" style="animation-duration: 15s;"></div>
+    <div class="fixed bottom-[-10%] right-[-5%] w-[35%] h-[35%] rounded-full bg-purple-300/20 blur-[100px] -z-10 animate-float" style="animation-duration: 20s; animation-direction: reverse;"></div>
+
+    <!-- Шапка (Header) -->
+    <header class="sticky top-0 z-50 glass border-b border-white/50 shadow-sm transition-all duration-300" id="mainHeader">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Logo area -->
+            <div class="flex items-center gap-4 group cursor-pointer">
+                <div class="relative w-12 h-12 flex items-center justify-center bg-gradient-to-br from-brand-500 to-brand-700 text-white rounded-2xl shadow-lg shadow-brand-500/30 group-hover:shadow-brand-500/50 transition-all duration-300 transform group-hover:-rotate-3">
+                    <i class="ph-fill ph-student text-2xl"></i>
+                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 border-2 border-white rounded-full"></div>
+                </div>
+                <div>
+                    <h1 class="font-display text-xl sm:text-2xl font-bold tracking-tight text-slate-900 group-hover:text-brand-700 transition-colors">
+                        Журнал <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-purple-600">PRO</span>
+                    </h1>
+                    <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
+                        <span class="bg-slate-100 px-2 py-0.5 rounded text-slate-600">2026/27</span>
+                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                        <span>10 «А» класс</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right side actions & info -->
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-3 bg-white/50 px-4 py-2 rounded-2xl border border-white shadow-sm backdrop-blur-sm">
+                    <i class="ph ph-calendar-blank text-slate-400 text-lg"></i>
+                    <span id="currentDate" class="text-sm font-medium text-slate-600"></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент (Main Content) -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full z-10">
+        
+        <!-- Welcome Section -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 animate-slide-up">
+            <div>
+                <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                    Доброе утро, <span class="text-brand-600">Коллега</span> 👋
+                </h2>
+                <p class="text-slate-500 mt-2 max-w-2xl text-sm sm:text-base">
+                    Ваша персональная панель управления учебным процессом. Выберите нужный инструмент для работы.
+                </p>
+            </div>
+            
+            <button onclick="openAllModules()" class="group inline-flex items-center gap-2 bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-brand-200 text-slate-700 hover:text-brand-700 px-5 py-2.5 rounded-2xl font-medium transition-all duration-300">
+                <i class="ph-bold ph-squares-four text-lg group-hover:rotate-90 transition-transform duration-500"></i>
+                Открыть все модули
+            </button>
+        </div>
+
+        <!-- Сетка модулей (Modules Grid) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            
+            <!-- 1. Успеваемость -->
+            <div class="module-card bg-white rounded-[28px] p-6 shadow-sm border border-slate-100 flex flex-col h-full animate-slide-up delay-100 cursor-pointer group" onclick="openModule('Успеваемость.html')">
+                <div class="flex items-start justify-between mb-6">
+                    <div class="icon-container w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-3xl shadow-inner border border-blue-100/50">
+                        <i class="ph-duotone ph-exam"></i>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-blue-700 bg-blue-100/50 px-2.5 py-1 rounded-full">
+                        <i class="ph-fill ph-trend-up"></i> Оценки
+                    </span>
+                </div>
+                <div class="flex-grow">
+                    <h3 class="font-display text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Успеваемость</h3>
+                    <p class="text-sm text-slate-500 mt-2 leading-relaxed">
+                        Электронный журнал, средний балл, табели успеваемости и аналитика от ИИ.
+                    </p>
+                </div>
+                <div class="mt-6 flex items-center justify-between text-blue-600 font-semibold text-sm">
+                    <span>Открыть модуль</span>
+                    <i class="ph-bold ph-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </div>
+
+            <!-- 2. Воспитательная работа -->
+            <div class="module-card bg-white rounded-[28px] p-6 shadow-sm border border-slate-100 flex flex-col h-full animate-slide-up delay-200 cursor-pointer group" onclick="openModule('Воспитательная.html')">
+                <div class="flex items-start justify-between mb-6">
+                    <div class="icon-container w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center text-3xl shadow-inner border border-emerald-100/50">
+                        <i class="ph-duotone ph-chalkboard-teacher"></i>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-emerald-700 bg-emerald-100/50 px-2.5 py-1 rounded-full">
+                        <i class="ph-fill ph-calendar-check"></i> План
+                    </span>
+                </div>
+                <div class="flex-grow">
+                    <h3 class="font-display text-lg font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Воспитательная</h3>
+                    <p class="text-sm text-slate-500 mt-2 leading-relaxed">
+                        Планы на полугодие, календарь мероприятий, отчеты и аналитика активности.
+                    </p>
+                </div>
+                <div class="mt-6 flex items-center justify-between text-emerald-500 font-semibold text-sm">
+                    <span>Открыть модуль</span>
+                    <i class="ph-bold ph-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </div>
+
+            <!-- 3. Посещаемость -->
+            <div class="module-card bg-white rounded-[28px] p-6 shadow-sm border border-slate-100 flex flex-col h-full animate-slide-up delay-300 cursor-pointer group" onclick="openModule('Посещаемость.html')">
+                <div class="flex items-start justify-between mb-6">
+                    <div class="icon-container w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-3xl shadow-inner border border-purple-100/50">
+                        <i class="ph-duotone ph-calendar-x"></i>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-purple-700 bg-purple-100/50 px-2.5 py-1 rounded-full">
+                        <i class="ph-fill ph-clock"></i> Учет
+                    </span>
+                </div>
+                <div class="flex-grow">
+                    <h3 class="font-display text-lg font-bold text-slate-800 group-hover:text-purple-600 transition-colors">Посещаемость</h3>
+                    <p class="text-sm text-slate-500 mt-2 leading-relaxed">
+                        Быстрый учет пропусков, контроль справок, опозданий и статистика по классу.
+                    </p>
+                </div>
+                <div class="mt-6 flex items-center justify-between text-purple-600 font-semibold text-sm">
+                    <span>Открыть модуль</span>
+                    <i class="ph-bold ph-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </div>
+
+            <!-- 4. Рассадка -->
+            <div class="module-card bg-white rounded-[28px] p-6 shadow-sm border border-slate-100 flex flex-col h-full animate-slide-up delay-400 cursor-pointer group" onclick="openModule('Рассадка.html')">
+                <div class="flex items-start justify-between mb-6">
+                    <div class="icon-container w-14 h-14 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-3xl shadow-inner border border-amber-100/50">
+                        <i class="ph-duotone ph-users-three"></i>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-amber-700 bg-amber-100/50 px-2.5 py-1 rounded-full">
+                        <i class="ph-fill ph-grid-four"></i> Схема
+                    </span>
+                </div>
+                <div class="flex-grow">
+                    <h3 class="font-display text-lg font-bold text-slate-800 group-hover:text-amber-500 transition-colors">Рассадка</h3>
+                    <p class="text-sm text-slate-500 mt-2 leading-relaxed">
+                        Интерактивная схема кабинета, учет роста, зрения и особенностей здоровья.
+                    </p>
+                </div>
+                <div class="mt-6 flex items-center justify-between text-amber-500 font-semibold text-sm">
+                    <span>Открыть модуль</span>
+                    <i class="ph-bold ph-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </div>
+
+            <!-- 5. Социальный паспорт -->
+            <div class="module-card bg-white rounded-[28px] p-6 shadow-sm border border-slate-100 flex flex-col h-full animate-slide-up delay-500 cursor-pointer group" onclick="openModule('Соцпаспорт.html')">
+                <div class="flex items-start justify-between mb-6">
+                    <div class="icon-container w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center text-3xl shadow-inner border border-rose-100/50">
+                        <i class="ph-duotone ph-identification-card"></i>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-rose-700 bg-rose-100/50 px-2.5 py-1 rounded-full">
+                        <i class="ph-fill ph-file-text"></i> Документ
+                    </span>
+                </div>
+                <div class="flex-grow">
+                    <h3 class="font-display text-lg font-bold text-slate-800 group-hover:text-rose-500 transition-colors">Соц. паспорт</h3>
+                    <p class="text-sm text-slate-500 mt-2 leading-relaxed">
+                        Сводка по семьям, категории учащихся, генерация официального документа.
+                    </p>
+                </div>
+                <div class="mt-6 flex items-center justify-between text-rose-500 font-semibold text-sm">
+                    <span>Открыть модуль</span>
+                    <i class="ph-bold ph-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- Инфо-блоки (Цитаты и Заметки) -->
+        <div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-up delay-500">
+            
+            <!-- Блок с цитатами (Quotes Section) -->
+            <div class="lg:col-span-2 bg-white rounded-[28px] p-8 md:p-10 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md hover:border-brand-100 transition-all duration-300 flex items-center">
+                <div class="absolute top-0 right-0 p-8 opacity-5 transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-700 pointer-events-none">
+                    <i class="ph-fill ph-quotes text-9xl text-brand-600"></i>
+                </div>
+                <div class="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left w-full">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100 text-brand-600 flex items-center justify-center text-3xl shrink-0 shadow-inner border border-brand-200/50">
+                        <i class="ph-fill ph-book-open-text"></i>
+                    </div>
+                    <div class="flex-grow flex flex-col justify-center min-h-[4rem]">
+                        <p id="quoteText" class="text-slate-700 text-lg md:text-xl italic font-medium max-w-4xl leading-relaxed transition-opacity duration-500 opacity-0"></p>
+                        <p id="quoteAuthor" class="text-brand-600 font-semibold mt-4 text-sm uppercase tracking-wider transition-opacity duration-500 opacity-0"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Блок Быстрые заметки (Quick Notes) -->
+            <div class="bg-[#fef9c3] rounded-[28px] p-6 md:p-8 shadow-sm border border-yellow-200/50 flex flex-col h-full hover:shadow-md hover:bg-yellow-100/80 transition-all duration-300 relative">
+                <div class="absolute top-0 right-6 w-8 h-8 bg-yellow-400/20 rounded-b-lg -z-10 blur-sm"></div>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-display font-bold text-yellow-900 flex items-center gap-2">
+                        <i class="ph-fill ph-push-pin text-yellow-600 text-xl"></i> Заметки
+                    </h3>
+                    <span id="saveIndicator" class="text-[10px] text-emerald-700 font-bold uppercase tracking-wider bg-emerald-100/80 px-2 py-1 rounded-md opacity-0 transition-opacity duration-300 flex items-center gap-1 shadow-sm">
+                        <i class="ph-bold ph-check"></i> Сохранено
+                    </span>
+                </div>
+                <textarea id="quickNotes" style="min-height: 120px;" class="w-full flex-grow bg-transparent border-none outline-none resize-none text-yellow-900 placeholder:text-yellow-700/50 text-sm leading-relaxed font-medium" placeholder="Напишите здесь важные задачи на сегодня... Они сохранятся автоматически!"></textarea>
+            </div>
+            
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateEl = document.getElementById('currentDate');
+            if (dateEl) {
+                const options = { weekday: 'long', day: 'numeric', month: 'long' };
+                let dateStr = new Date().toLocaleDateString('ru-RU', options);
+                dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+                dateEl.textContent = dateStr;
+            }
+        });
+
+        const quotes = [
+            { text: "Образование — это самое мощное оружие, с помощью которого можно изменить мир.", author: "Нельсон Мандела" },
+            { text: "Учитель влияет на вечность: никогда нельзя быть уверенным, где кончается его влияние.", author: "Генри Адамс" },
+            { text: "Ученик — это не сосуд, который надо наполнить, а факел, который надо зажечь.", author: "Плутарх" },
+            { text: "Искусство обучения есть искусство будить в юных душах любознательность.", author: "Анатоль Франс" },
+            { text: "Хороший учитель защищает учеников от собственного влияния.", author: "Брюс Ли" }
+        ];
+        let currentQuote = 0;
+        
+        function updateQuote() {
+            const quoteText = document.getElementById('quoteText');
+            const quoteAuthor = document.getElementById('quoteAuthor');
+            
+            if(!quoteText || !quoteAuthor) return;
+
+            quoteText.style.opacity = '0';
+            quoteAuthor.style.opacity = '0';
+            
+            setTimeout(() => {
+                quoteText.textContent = `«${quotes[currentQuote].text}»`;
+                quoteAuthor.textContent = `— ${quotes[currentQuote].author}`;
+                
+                quoteText.style.opacity = '1';
+                quoteAuthor.style.opacity = '1';
+                
+                currentQuote = (currentQuote + 1) % quotes.length;
+            }, 500);
+        }
+
+        setTimeout(updateQuote, 100);
+        setInterval(updateQuote, 10000);
+
+        const notesArea = document.getElementById('quickNotes');
+        const saveIndicator = document.getElementById('saveIndicator');
+        let saveTimeout;
+
+        if (notesArea) {
+            // Загрузка сохраненного текста при открытии страницы
+            notesArea.value = localStorage.getItem('teacherPro_quickNotes') || '';
+            
+            // Сохранение при каждом нажатии клавиши
+            notesArea.addEventListener('input', (e) => {
+                localStorage.setItem('teacherPro_quickNotes', e.target.value);
+                
+                // Показ индикатора "Сохранено"
+                saveIndicator.style.opacity = '1';
+                clearTimeout(saveTimeout);
+                
+                saveTimeout = setTimeout(() => {
+                    saveIndicator.style.opacity = '0';
+                }, 1500);
+            });
+        }
+
+        function openModule(fileName) {
+            window.open(fileName, '_blank');
+        }
+
+        function openAllModules() {
+            const modules = [
+                'Успеваемость.html',
+                'Воспитательная.html',
+                'Посещаемость.html',
+                'Рассадка.html',
+                'Соцпаспорт.html'
+            ];
+            modules.forEach((file, index) => {
+                setTimeout(() => {
+                    openModule(file);
+                }, index * 200);
+            });
+        }
+    </script>
+    <script>
+    // РЕГИСТРАЦИЯ PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('✅ PWA установлено!');
+                })
+                .catch(error => {
+                    console.log('❌ Ошибка:', error);
+                });
+        });
+    }
+
+    // ОТСЛЕЖИВАНИЕ ИНТЕРНЕТА
+    window.addEventListener('offline', () => {
+        const banner = document.createElement('div');
+        banner.id = 'offlineBanner';
+        banner.style.cssText = `
+            position: fixed; top: 0; left: 0; right: 0;
+            background: #f59e0b; color: white; text-align: center;
+            padding: 8px; font-weight: 600; font-size: 12px;
+            z-index: 9999;
+        `;
+        banner.textContent = '📴 Офлайн-режим. Данные сохраняются локально.';
+        document.body.prepend(banner);
+    });
+
+    window.addEventListener('online', () => {
+        document.getElementById('offlineBanner')?.remove();
+    });
+    </script>
+    
+</body>
+</html>

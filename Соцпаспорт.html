@@ -1,0 +1,2481 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Социальный паспорт 9 «А» класса</title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: { 50: '#f0f7ff', 100: '#e0effe', 500: '#2563eb', 600: '#1d4ed8', 700: '#1e40af', 900: '#1e293b' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+        font-size: 11pt !important;
+        color: black !important;
+      }
+      .container-print {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      table {
+        page-break-inside: auto;
+      }
+      tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
+      thead {
+        display: table-header-group;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+      .shadow-md,
+      .shadow-lg,
+      .shadow-sm {
+        box-shadow: none !important;
+      }
+      .border-dashed {
+        border-style: solid !important;
+      }
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="h-full font-sans text-slate-800 antialiased flex flex-col">
+
+  <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-30 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <div class="bg-blue-600 p-2.5 rounded-xl shadow-md text-white">
+            <i class="fa-solid fa-graduation-cap text-xl"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
+              Социальный паспорт класса
+              <span id="classBadge" class="bg-blue-500/30 text-blue-200 text-xs px-2.5 py-0.5 rounded-full border border-blue-400/30">9 «А»</span>
+            </h1>
+            <p class="text-xs text-slate-400" id="teacherHeader">Кл. руководитель: Барейша Илья Александрович</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="openStudentModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-medium px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-user-plus"></i> <span class="hidden sm:inline">Добавить ученика</span>
+          </button>
+          <button onclick="exportToCSV()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg transition-all border border-slate-700 flex items-center gap-1.5" title="Экспорт в CSV">
+            <i class="fa-solid fa-file-csv"></i> <span class="hidden md:inline">CSV</span>
+          </button>
+          <button onclick="exportJSON()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg transition-all border border-slate-700 flex items-center gap-1.5" title="Скачать копию данных (JSON)">
+            <i class="fa-solid fa-download"></i> <span class="hidden md:inline">Экспорт</span>
+          </button>
+          <button onclick="document.getElementById('importFile').click()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg transition-all border border-slate-700 flex items-center gap-1.5" title="Загрузить из JSON">
+            <i class="fa-solid fa-upload"></i> <span class="hidden md:inline">Импорт</span>
+          </button>
+          <input type="file" id="importFile" accept=".json" class="hidden" onchange="importJSON(event)">
+          <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-medium px-3 py-2 rounded-lg transition-all shadow-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-print"></i> <span>Печать</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="bg-white border-b border-slate-200 sticky top-16 z-20 no-print shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="flex space-x-1 sm:space-x-4 overflow-x-auto py-2 custom-scrollbar text-xs sm:text-sm font-medium">
+        <button id="tab-dashboard-btn" onclick="switchTab('dashboard')" class="tab-btn px-3 py-2 rounded-lg text-blue-600 bg-blue-50 font-semibold flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-chart-pie"></i> Сводка & Статистика
+        </button>
+        <button id="tab-students-btn" onclick="switchTab('students')" class="tab-btn px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-users"></i> Список учащихся (<span id="tabCountStudents">22</span>)
+        </button>
+        <button id="tab-categories-btn" onclick="switchTab('categories')" class="tab-btn px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-layer-group"></i> Категории & Учеты
+        </button>
+        <button id="tab-official-btn" onclick="switchTab('official')" class="tab-btn px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-file-contract"></i> Официальный документ
+        </button>
+        <button id="tab-settings-btn" onclick="switchTab('settings')" class="tab-btn px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-gear"></i> Настройки класса
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <div id="tab-dashboard" class="tab-content space-y-6">
+
+      <!-- General Summary Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <span class="text-xs font-semibold text-slate-500 uppercase">Учащихся</span>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="text-2xl sm:text-3xl font-extrabold text-slate-800" id="statTotal">22</span>
+            <i class="fa-solid fa-user-graduate text-blue-500 text-lg"></i>
+          </div>
+          <div class="text-[11px] text-slate-500 mt-1 flex gap-2">
+            <span>👦 <strong id="statBoys" class="text-slate-700">8</strong></span>
+            <span>👧 <strong id="statGirls" class="text-slate-700">14</strong></span>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <span class="text-xs font-semibold text-slate-500 uppercase">Многодетные</span>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="text-2xl sm:text-3xl font-extrabold text-emerald-600" id="statLarge">4</span>
+            <i class="fa-solid fa-people-roof text-emerald-500 text-lg"></i>
+          </div>
+          <span class="text-[11px] text-slate-400 mt-1">Семьи с 3+ детьми</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <span class="text-xs font-semibold text-slate-500 uppercase">Неполные семьи</span>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="text-2xl sm:text-3xl font-extrabold text-amber-600" id="statSingle">2</span>
+            <i class="fa-solid fa-person-breastfeeding text-amber-500 text-lg"></i>
+          </div>
+          <span class="text-[11px] text-slate-400 mt-1">Мать/отец одиночка</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <span class="text-xs font-semibold text-slate-500 uppercase">Учет & Риск</span>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="text-2xl sm:text-3xl font-extrabold text-rose-600" id="statRisk">1</span>
+            <i class="fa-solid fa-triangle-exclamation text-rose-500 text-lg"></i>
+          </div>
+          <span class="text-[11px] text-slate-400 mt-1">СОП/ИПР/Гр.риска</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <span class="text-xs font-semibold text-slate-500 uppercase">Инвалид / ОПФР</span>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="text-2xl sm:text-3xl font-extrabold text-purple-600" id="statDisabled">1</span>
+            <i class="fa-solid fa-wheelchair text-purple-500 text-lg"></i>
+          </div>
+          <span class="text-[11px] text-slate-400 mt-1">Надомное обуч.</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <span class="text-xs font-semibold text-slate-500 uppercase">Одаренные</span>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="text-2xl sm:text-3xl font-extrabold text-indigo-600" id="statGifted">4</span>
+            <i class="fa-solid fa-star text-indigo-500 text-lg"></i>
+          </div>
+          <span class="text-[11px] text-slate-400 mt-1">Высок. способности</span>
+        </div>
+      </div>
+
+      <!-- New Cards for Nutrition and Profile -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <span class="text-xs font-semibold text-slate-500 uppercase">🍽️ Питание</span>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="text-2xl sm:text-3xl font-extrabold text-emerald-600" id="statMealPaid">0</span>
+            <span class="text-sm text-slate-500">платное</span>
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+            <span>🆓 <strong id="statMealFree" class="text-slate-700">0</strong></span>
+            <span>🚫 <strong id="statMealNone" class="text-slate-700">0</strong></span>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <span class="text-xs font-semibold text-slate-500 uppercase">📚 Профиль</span>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="text-2xl sm:text-3xl font-extrabold text-blue-600" id="statProfileBase">0</span>
+            <span class="text-sm text-slate-500">базовый</span>
+          </div>
+          <div class="text-[11px] text-slate-500 mt-1">
+            <span>🧑‍🏫 <strong id="statProfilePed" class="text-slate-700">0</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Table 1: Class Stats -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 overflow-hidden">
+        <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-table-cells text-blue-600"></i> Сводная социальная характеристика класса
+        </h2>
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-xs text-center border-collapse border border-slate-200">
+            <thead class="bg-slate-100 text-slate-700 font-semibold">
+              <tr>
+                <th class="border border-slate-200 p-2 font-bold" rowspan="2">Класс</th>
+                <th class="border border-slate-200 p-2 font-bold" colspan="3">Количество учащихся</th>
+                <th class="border border-slate-200 p-2 font-bold" colspan="5">Особый учет / Статус</th>
+                <th class="border border-slate-200 p-2 font-bold" colspan="3">Общественные организации</th>
+                <th class="border border-slate-200 p-2 font-bold" colspan="3">Питание</th>
+                <th class="border border-slate-200 p-2 font-bold" colspan="2">Профиль</th>
+              </tr>
+              <tr>
+                <th class="border border-slate-200 p-2">Всего</th>
+                <th class="border border-slate-200 p-2">Девочки</th>
+                <th class="border border-slate-200 p-2">Мальчики</th>
+                <th class="border border-slate-200 p-2">СОП</th>
+                <th class="border border-slate-200 p-2">ИПР</th>
+                <th class="border border-slate-200 p-2">Опека / Приемные</th>
+                <th class="border border-slate-200 p-2">Группа риска</th>
+                <th class="border border-slate-200 p-2">Дети-инвалиды</th>
+                <th class="border border-slate-200 p-2">БРПО</th>
+                <th class="border border-slate-200 p-2">БРСМ</th>
+                <th class="border border-slate-200 p-2">Октябрята</th>
+                <th class="border border-slate-200 p-2">Платное</th>
+                <th class="border border-slate-200 p-2">Бесплатное</th>
+                <th class="border border-slate-200 p-2">Не питается</th>
+                <th class="border border-slate-200 p-2">Базовый</th>
+                <th class="border border-slate-200 p-2">Педагогический</th>
+              </tr>
+            </thead>
+            <tbody id="dashTableSummary" class="text-slate-800 font-medium">
+              <!-- JS auto renders -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Parent Education and Employment Breakdown Tables -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+        <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-users-rectangle text-blue-600"></i> Характеристика семей родителей (Уровень образования и Занятость)
+        </h2>
+
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-xs text-center border-collapse border border-slate-200">
+            <thead class="bg-slate-100 text-slate-700 font-semibold">
+              <tr>
+                <th class="border border-slate-200 p-2" rowspan="3">Многодетные</th>
+                <th class="border border-slate-200 p-2" rowspan="3">Малообеспеч.</th>
+                <th class="border border-slate-200 p-2" colspan="2" rowspan="2">Неполные семьи</th>
+                <th class="border border-slate-200 p-2" rowspan="3">СОП</th>
+                <th class="border border-slate-200 p-2" colspan="10">Образовательный уровень родителей</th>
+                <th class="border border-slate-200 p-2" colspan="10">Занятость родителей</th>
+              </tr>
+              <tr>
+                <th class="border border-slate-200 p-2" colspan="5">Мать</th>
+                <th class="border border-slate-200 p-2" colspan="5">Отец</th>
+                <th class="border border-slate-200 p-2" colspan="5">Мать</th>
+                <th class="border border-slate-200 p-2" colspan="5">Отец</th>
+              </tr>
+              <tr class="bg-slate-50 text-[10px]">
+                <th class="border border-slate-200 p-1.5">Всего</th>
+                <th class="border border-slate-200 p-1.5">Мать</th>
+
+                <th class="border border-slate-200 p-1.5">Н/ср</th>
+                <th class="border border-slate-200 p-1.5">Ср</th>
+                <th class="border border-slate-200 p-1.5">Ср-спец</th>
+                <th class="border border-slate-200 p-1.5">ПТО</th>
+                <th class="border border-slate-200 p-1.5">Высш</th>
+
+                <th class="border border-slate-200 p-1.5">Н/ср</th>
+                <th class="border border-slate-200 p-1.5">Ср</th>
+                <th class="border border-slate-200 p-1.5">Ср-спец</th>
+                <th class="border border-slate-200 p-1.5">ПТО</th>
+                <th class="border border-slate-200 p-1.5">Высш</th>
+
+                <th class="border border-slate-200 p-1.5">ИП</th>
+                <th class="border border-slate-200 p-1.5">Раб.</th>
+                <th class="border border-slate-200 p-1.5">Служ.</th>
+                <th class="border border-slate-200 p-1.5">Не оф.</th>
+                <th class="border border-slate-200 p-1.5">Не раб.</th>
+
+                <th class="border border-slate-200 p-1.5">ИП</th>
+                <th class="border border-slate-200 p-1.5">Раб.</th>
+                <th class="border border-slate-200 p-1.5">Служ.</th>
+                <th class="border border-slate-200 p-1.5">Не оф.</th>
+                <th class="border border-slate-200 p-1.5">Не раб.</th>
+              </tr>
+            </thead>
+            <tbody id="dashTableFamilies" class="text-slate-800 font-medium">
+              <!-- JS Auto renders -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-students" class="tab-content space-y-4 hidden">
+
+      <!-- Toolbar Filter & Search -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+        <div class="relative w-full md:w-96">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input type="text" id="searchInput" oninput="renderStudentsTable()" placeholder="Поиск по ФИО, адресу, телефону или родителям..." class="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 custom-scrollbar">
+          <select id="filterCategory" onchange="renderStudentsTable()" class="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700">
+            <option value="all">Все категории</option>
+            <option value="isLargeFamily">👨‍👩‍👧‍👦 Многодетные</option>
+            <option value="isSingleParent">💔 Неполные семьи</option>
+            <option value="isRisk">⚠️ Группа риска / Учет</option>
+            <option value="isDisabled">♿ Дети-инвалиды / ОПФР</option>
+            <option value="isGifted">⭐ Одаренные дети</option>
+            <option value="isHomeSchool">🏡 Надомное обучение</option>
+            <option value="isChernobyl">☢️ Чернобыльцы / Афганцы</option>
+            <option value="isLowIncome">📉 Малообеспеченные</option>
+            <option value="isSop">🚨 СОП</option>
+            <option value="meal">🍽️ Платное питание</option>
+            <option value="mealFree">🆓 Бесплатное питание</option>
+            <option value="mealNone">🚫 Не питается</option>
+            <option value="profilePed">🧑‍🏫 Педагогический профиль</option>
+          </select>
+
+          <select id="filterGender" onchange="renderStudentsTable()" class="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-700">
+            <option value="all">Все полы</option>
+            <option value="male">👦 Мальчики</option>
+            <option value="female">👧 Девочки</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Main Students Table -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-sm text-left border-collapse">
+            <thead class="bg-slate-800 text-slate-200 text-xs font-semibold uppercase tracking-wider">
+              <tr>
+                <th class="py-3 px-3 text-center w-10">№</th>
+                <th class="py-3 px-4">ФИО Ученика / Дата рожд.</th>
+                <th class="py-3 px-4">Адрес / Телефон</th>
+                <th class="py-3 px-3 text-center">Гр.здоровья</th>
+                <th class="py-3 px-4">Законные представители (Родители)</th>
+                <th class="py-3 px-3 text-center">Питание</th>
+                <th class="py-3 px-3 text-center">Профиль</th>
+                <th class="py-3 px-3 text-center">Категории</th>
+                <th class="py-3 px-3 text-right no-print">Действия</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTableBody" class="divide-y divide-slate-200">
+              <!-- JS auto renders -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-categories" class="tab-content space-y-6 hidden">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Risk & SOP -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Проф. учеты и Группа риска
+            </h3>
+            <span id="badgeRiskCount" class="bg-rose-100 text-rose-700 font-bold text-xs px-2.5 py-0.5 rounded-full">0</span>
+          </div>
+          <div id="listRisk" class="space-y-3 text-xs"></div>
+        </div>
+
+        <!-- Disability & OPFR & Home School -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-wheelchair text-purple-600"></i> Дети-инвалиды, ОПФР & Надомное обучение
+            </h3>
+            <span id="badgeDisabledCount" class="bg-purple-100 text-purple-700 font-bold text-xs px-2.5 py-0.5 rounded-full">0</span>
+          </div>
+          <div id="listDisabled" class="space-y-3 text-xs"></div>
+        </div>
+
+        <!-- Gifted Children -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-star text-amber-500"></i> Одаренные дети
+            </h3>
+            <span id="badgeGiftedCount" class="bg-amber-100 text-amber-700 font-bold text-xs px-2.5 py-0.5 rounded-full">0</span>
+          </div>
+          <div id="listGifted" class="space-y-3 text-xs"></div>
+        </div>
+
+        <!-- Large Families -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-people-roof text-emerald-600"></i> Многодетные семьи
+            </h3>
+            <span id="badgeLargeCount" class="bg-emerald-100 text-emerald-700 font-bold text-xs px-2.5 py-0.5 rounded-full">0</span>
+          </div>
+          <div id="listLarge" class="space-y-3 text-xs"></div>
+        </div>
+
+        <!-- Single Parent Families -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-person-breastfeeding text-blue-600"></i> Неполные семьи
+            </h3>
+            <span id="badgeSingleCount" class="bg-blue-100 text-blue-700 font-bold text-xs px-2.5 py-0.5 rounded-full">0</span>
+          </div>
+          <div id="listSingle" class="space-y-3 text-xs"></div>
+        </div>
+
+        <!-- Chernobyl / Afghan / Refugees -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-shield-halved text-cyan-600"></i> Семьи афганцев, чернобыльцев, беженцев
+            </h3>
+            <span id="badgeChernobylCount" class="bg-cyan-100 text-cyan-700 font-bold text-xs px-2.5 py-0.5 rounded-full">0</span>
+          </div>
+          <div id="listChernobyl" class="space-y-3 text-xs"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="tab-official" class="tab-content space-y-6 hidden">
+      <div class="bg-white p-8 rounded-2xl border border-slate-300 shadow-lg max-w-5xl mx-auto container-print text-slate-900 leading-normal">
+
+        <!-- Official Document Header -->
+        <div class="text-center space-y-2 mb-6 border-b-2 border-slate-900 pb-4">
+          <h2 class="text-xl sm:text-2xl font-extrabold uppercase tracking-wider">СОЦИАЛЬНЫЙ ПАСПОРТ <span id="docClassName">9 «А»</span> КЛАССА</h2>
+          <p class="font-semibold text-sm">ЗА <span id="docAcademicYear">2025–2026</span> УЧЕБНЫЙ ГОД</p>
+          <div class="flex justify-between items-center text-xs font-medium pt-2 px-2">
+            <span>Классный руководитель: <strong id="docTeacherName">Барейша Илья Александрович</strong></span>
+            <span>Всего учащихся: <strong id="docTotalCount">22</strong> (Мальчиков: <strong id="docBoysCount">8</strong>, Девочек: <strong id="docGirlsCount">14</strong>)</span>
+          </div>
+        </div>
+
+        <!-- Official Section 1: Summary Table -->
+        <div class="mb-6">
+          <h3 class="text-xs font-bold uppercase mb-2">1. Сводная таблица учета учащихся</h3>
+          <table class="w-full text-[11px] text-center border-collapse border border-slate-800">
+            <thead class="bg-slate-100 font-bold">
+              <tr>
+                <th class="border border-slate-800 p-1">Класс</th>
+                <th class="border border-slate-800 p-1">Всего</th>
+                <th class="border border-slate-800 p-1">Дев.</th>
+                <th class="border border-slate-800 p-1">Мал.</th>
+                <th class="border border-slate-800 p-1">СОП</th>
+                <th class="border border-slate-800 p-1">ИПР</th>
+                <th class="border border-slate-800 p-1">Опека</th>
+                <th class="border border-slate-800 p-1">Гр.риска</th>
+                <th class="border border-slate-800 p-1">Инвалиды</th>
+                <th class="border border-slate-800 p-1">БРПО</th>
+                <th class="border border-slate-800 p-1">БРСМ</th>
+                <th class="border border-slate-800 p-1">Октябрята</th>
+                <th class="border border-slate-800 p-1">Платное</th>
+                <th class="border border-slate-800 p-1">Беспл.</th>
+                <th class="border border-slate-800 p-1">Не пит.</th>
+                <th class="border border-slate-800 p-1">Базовый</th>
+                <th class="border border-slate-800 p-1">Пед.</th>
+              </tr>
+            </thead>
+            <tbody id="officialSummaryRow"></tbody>
+          </table>
+        </div>
+
+        <!-- Official Section 2: Family Characteristics -->
+        <div class="mb-6">
+          <h3 class="text-xs font-bold uppercase mb-2">2. Характеристика семей</h3>
+          <table class="w-full text-[10px] text-center border-collapse border border-slate-800">
+            <thead class="bg-slate-100 font-bold">
+              <tr>
+                <th class="border border-slate-800 p-1" rowspan="3">Многодет.</th>
+                <th class="border border-slate-800 p-1" rowspan="3">Малообесп.</th>
+                <th class="border border-slate-800 p-1" colspan="2">Неполные</th>
+                <th class="border border-slate-800 p-1" rowspan="3">СОП</th>
+                <th class="border border-slate-800 p-1" colspan="10">Образование родителей</th>
+                <th class="border border-slate-800 p-1" colspan="10">Занятость родителей</th>
+              </tr>
+              <tr>
+                <th class="border border-slate-800 p-1" colspan="2">Всего / Мать</th>
+                <th class="border border-slate-800 p-1" colspan="5">Мать</th>
+                <th class="border border-slate-800 p-1" colspan="5">Отец</th>
+                <th class="border border-slate-800 p-1" colspan="5">Мать</th>
+                <th class="border border-slate-800 p-1" colspan="5">Отец</th>
+              </tr>
+              <tr class="text-[9px]">
+                <th class="border border-slate-800 p-0.5">Вс.</th>
+                <th class="border border-slate-800 p-0.5">М.</th>
+                <th class="border border-slate-800 p-0.5">Н/ср</th>
+                <th class="border border-slate-800 p-0.5">Ср</th>
+                <th class="border border-slate-800 p-0.5">С/сп</th>
+                <th class="border border-slate-800 p-0.5">ПТО</th>
+                <th class="border border-slate-800 p-0.5">Высш</th>
+                <th class="border border-slate-800 p-0.5">Н/ср</th>
+                <th class="border border-slate-800 p-0.5">Ср</th>
+                <th class="border border-slate-800 p-0.5">С/сп</th>
+                <th class="border border-slate-800 p-0.5">ПТО</th>
+                <th class="border border-slate-800 p-0.5">Высш</th>
+                <th class="border border-slate-800 p-0.5">ИП</th>
+                <th class="border border-slate-800 p-0.5">Раб</th>
+                <th class="border border-slate-800 p-0.5">Служ</th>
+                <th class="border border-slate-800 p-0.5">Неоф</th>
+                <th class="border border-slate-800 p-0.5">Н/раб</th>
+                <th class="border border-slate-800 p-0.5">ИП</th>
+                <th class="border border-slate-800 p-0.5">Раб</th>
+                <th class="border border-slate-800 p-0.5">Служ</th>
+                <th class="border border-slate-800 p-0.5">Неоф</th>
+                <th class="border border-slate-800 p-0.5">Н/раб</th>
+              </tr>
+            </thead>
+            <tbody id="officialFamiliesRow"></tbody>
+          </table>
+        </div>
+
+        <!-- Official Section 3: Full Student Roster -->
+        <div class="mb-6 page-break">
+          <h3 class="text-xs font-bold uppercase mb-2">3. Список учащихся класса</h3>
+          <table class="w-full text-[10px] border-collapse border border-slate-800">
+            <thead class="bg-slate-100 font-bold text-center">
+              <tr>
+                <th class="border border-slate-800 p-1 w-6">№</th>
+                <th class="border border-slate-800 p-1">ФИО ученика, дата рождения</th>
+                <th class="border border-slate-800 p-1">Домашний адрес, телефон</th>
+                <th class="border border-slate-800 p-1 w-16">Группа здоровья</th>
+                <th class="border border-slate-800 p-1">Хрон. заболевания / учет</th>
+                <th class="border border-slate-800 p-1">ФИО законных представителей, место работы, тел.</th>
+                <th class="border border-slate-800 p-1">Питание</th>
+                <th class="border border-slate-800 p-1">Профиль</th>
+              </tr>
+            </thead>
+            <tbody id="officialRosterTable"></tbody>
+          </table>
+        </div>
+
+        <!-- Official Section 4: Categorized Tables -->
+        <div id="officialSpecialTables" class="space-y-6"></div>
+
+        <!-- Official Signatures -->
+        <div class="mt-12 pt-6 border-t border-slate-400 flex justify-between items-center text-xs font-medium">
+          <div>
+            <span>Классный руководитель: ____________________ / <strong id="docSignatureTeacher">Барейша И.А.</strong> /</span>
+          </div>
+          <div>
+            <span>Дата: «____» ____________ 20___ г.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="tab-settings" class="tab-content space-y-6 hidden">
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm max-w-2xl mx-auto space-y-5">
+        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-3">
+          <i class="fa-solid fa-sliders text-blue-600"></i> Настройки данных класса
+        </h2>
+
+        <div class="space-y-4 text-sm">
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Название класса</label>
+            <input type="text" id="settingClassName" value="9 «А»" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+          </div>
+
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Учебный год</label>
+            <input type="text" id="settingAcademicYear" value="2025-2026" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+          </div>
+
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">ФИО Классного руководителя</label>
+            <input type="text" id="settingTeacher" value="Барейша Илья Александрович" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+          </div>
+
+          <div class="pt-4 border-t border-slate-100 flex gap-3">
+            <button onclick="saveSettings()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-5 py-2 rounded-lg text-sm transition-all shadow-sm">
+              <i class="fa-solid fa-floppy-disk mr-1"></i> Сохранить настройки
+            </button>
+            <button onclick="resetToInitialData()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-medium px-4 py-2 rounded-lg text-sm border border-rose-200 transition-all">
+              <i class="fa-solid fa-rotate-left mr-1"></i> Сбросить к исходным 22 ученикам
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="studentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-8 overflow-hidden flex flex-col max-h-[90vh]">
+
+      <!-- Modal Header -->
+      <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
+        <h3 class="font-bold text-base sm:text-lg flex items-center gap-2" id="modalTitle">
+          <i class="fa-solid fa-user-pen text-blue-400"></i> Данные учащихся
+        </h3>
+        <button onclick="closeStudentModal()" class="text-slate-400 hover:text-white text-xl">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Modal Form Body -->
+      <form id="studentForm" onsubmit="handleStudentFormSubmit(event)" class="p-6 overflow-y-auto space-y-6 text-sm custom-scrollbar flex-1">
+        <input type="hidden" id="editStudentId">
+
+        <!-- Section 1: Main Student Info -->
+        <div class="space-y-4">
+          <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider text-blue-600 border-b pb-1">
+            <i class="fa-solid fa-id-card"></i> Личные данные ученика
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">ФИО Ученика *</label>
+              <input type="text" id="m_name" required placeholder="Например: Иванов Иван Иванович" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Пол</label>
+              <select id="m_gender" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                <option value="male">Мальчик</option>
+                <option value="female">Девочка</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Дата рождения</label>
+              <input type="text" id="m_dob" placeholder="15.09.2011" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Телефон ученика</label>
+              <input type="text" id="m_phone" placeholder="+375 29 000 0000" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Членство в организации</label>
+              <select id="m_org" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                <option value="БРСМ">БРСМ</option>
+                <option value="БРПО">БРПО</option>
+                <option value="Октябрята">Октябрята</option>
+                <option value="none">Нет</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Точный домашний адрес</label>
+              <input type="text" id="m_address" placeholder="ул. Советская, д. 10, кв. 5" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Health Info -->
+        <div class="space-y-4">
+          <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider text-blue-600 border-b pb-1">
+            <i class="fa-solid fa-notes-medical"></i> Здоровье и медицинский учет
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Группа здоровья / физкультура</label>
+              <input type="text" id="m_healthGroup" placeholder="1 основная / 2 подготов / 3 СМГ / ЛФК" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Хронические заболевания / Замечания</label>
+              <input type="text" id="m_chronic" placeholder="Миопия, аллергия или прочее" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Mother Info -->
+        <div class="space-y-4">
+          <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider text-blue-600 border-b pb-1">
+            <i class="fa-solid fa-person"></i> Данные матери
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">ФИО Матери</label>
+              <input type="text" id="m_motherName" placeholder="Иванова Ольга Петровна" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Дата рождения / Тел.</label>
+              <input type="text" id="m_motherPhone" placeholder="+375 29 111 2233" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Место работы и должность</label>
+              <input type="text" id="m_motherWork" placeholder="ОАО БМЗ, бухгалтер" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Образование матери</label>
+              <select id="m_motherEdu" class="w-full px-3 py-2 border rounded-lg">
+                <option value="higher">Высшее</option>
+                <option value="special_sec">Среднее специальное</option>
+                <option value="prof_tech">Профессионально-техническое</option>
+                <option value="secondary">Среднее</option>
+                <option value="unfin_sec">Незаконченное среднее</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Занятость матери</label>
+              <select id="m_motherJob" class="w-full px-3 py-2 border rounded-lg">
+                <option value="employee">Служащая</option>
+                <option value="worker">Рабочая</option>
+                <option value="ip">ИП</option>
+                <option value="unregistered">Работает без оформления</option>
+                <option value="unemployed">Не работает / домохозяйка</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Father Info -->
+        <div class="space-y-4">
+          <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider text-blue-600 border-b pb-1">
+            <i class="fa-solid fa-person-shelter"></i> Данные отца / отчима
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">ФИО Отца / отчима</label>
+              <input type="text" id="m_fatherName" placeholder="Иванов Петр Сергеевич" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Дата рождения / Тел.</label>
+              <input type="text" id="m_fatherPhone" placeholder="+375 29 444 5566" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Место работы и должность</label>
+              <input type="text" id="m_fatherWork" placeholder="Завод, инженер" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Образование отца</label>
+              <select id="m_fatherEdu" class="w-full px-3 py-2 border rounded-lg">
+                <option value="higher">Высшее</option>
+                <option value="special_sec">Среднее специальное</option>
+                <option value="prof_tech">Профессионально-техническое</option>
+                <option value="secondary">Среднее</option>
+                <option value="unfin_sec">Незаконченное среднее</option>
+                <option value="none">Нет данных / отсутствует</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Занятость отца</label>
+              <select id="m_fatherJob" class="w-full px-3 py-2 border rounded-lg">
+                <option value="worker">Рабочий</option>
+                <option value="employee">Служащий</option>
+                <option value="ip">ИП</option>
+                <option value="unregistered">Работает без оформления</option>
+                <option value="unemployed">Не работает</option>
+                <option value="none">Отсутствует</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 5: Categories & Flags -->
+        <div class="space-y-4">
+          <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider text-blue-600 border-b pb-1">
+            <i class="fa-solid fa-tags"></i> Социальные категории и статусы
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50">
+              <input type="checkbox" id="m_isLargeFamily" class="rounded text-blue-600">
+              <span>👨‍👩‍👧‍👦 Многодетная семья</span>
+            </label>
+
+            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50">
+              <input type="checkbox" id="m_isSingleParent" class="rounded text-blue-600">
+              <span>💔 Неполная семья</span>
+            </label>
+
+            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50">
+              <input type="checkbox" id="m_isRisk" class="rounded text-blue-600">
+              <span>⚠️ «Группа риска» / Учет</span>
+            </label>
+
+            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50">
+              <input type="checkbox" id="m_isSop" class="rounded text-blue-600">
+              <span>🚨 СОП (Социально опасное)</span>
+            </label>
+
+            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50">
+              <input type="checkbox" id="m_isDisabled" class="rounded text-blue-600">
+              <span>♿ Ребенок-инвалид / ОПФР</span>
+            </label>
+
+            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50">
+              <input type="checkbox" id="m_isGifted" class="rounded text-blue-600">
+              <span>⭐ Одаренный ученик</span>
+            </label>
+
+            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50">
+              <input type="checkbox" id="m_isHomeSchool" class="rounded text-blue-600">
+              <span>🏡 Обучение на дому</span>
+            </label>
+
+            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-slate-50">
+              <input type="checkbox" id="m_isChernobyl" class="rounded text-blue-600">
+              <span>☢️ Чернобыльцы / Переселенцы</span>
+            </label>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Причина неполной семьи / Инфо о детях</label>
+              <input type="text" id="m_singleParentReason" placeholder="Мать-одиночка / развод / умер" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">№ Удостоверения / Заключения</label>
+              <input type="text" id="m_disabilityDoc" placeholder="№ 0106363 / Заключение МРЭК" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 6: Nutrition & Profile -->
+        <div class="space-y-4">
+          <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider text-blue-600 border-b pb-1">
+            <i class="fa-solid fa-utensils"></i> Питание и профиль обучения
+          </h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">🍽️ Питание</label>
+              <select id="m_meal" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                <option value="paid">Платное</option>
+                <option value="free">Бесплатное</option>
+                <option value="none">Не питается</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">📚 Профиль обучения</label>
+              <select id="m_profile" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                <option value="base">Базовый</option>
+                <option value="pedagogical">Педагогический</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer actions inside form -->
+        <div class="pt-4 border-t flex justify-end gap-3 sticky bottom-0 bg-white py-2">
+          <button type="button" onclick="closeStudentModal()" class="px-4 py-2 border text-slate-600 rounded-lg text-sm hover:bg-slate-100">Отмена</button>
+          <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg text-sm shadow-sm">Сохранить ученика</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300">
+    <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+    <span id="toastMsg" class="text-xs font-medium">Действие успешно выполнено</span>
+  </div>
+
+  <script>
+    const DEFAULT_STUDENTS = [{
+      id: "s1",
+      name: "Авсяникова Марина Александровна",
+      dob: "15.09.2011",
+      gender: "female",
+      phone: "+375 29 918 4161",
+      address: "Ул. Радужная, д.1",
+      healthGroup: "2 основная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "paid",
+      profile: "base",
+      mother: { name: "Авсяникова Ольга Владимировна", phone: "80295304222", work: "СООО «Конте-трейд», специалист по работе с клиентами, д/о", edu: "higher",
+        job: "employee" },
+      father: { name: "Авсяников Александр Петрович", phone: "44 510 04 50", work: "ОАО БМЗ, машинист крана", edu: "prof_tech",
+        job: "worker" }
+    }, {
+      id: "s2",
+      name: "Бабичев Алексей Даниилович",
+      dob: "13.01.2011",
+      gender: "male",
+      phone: "+375 29 602 6405",
+      address: "ул. Советская, д.10",
+      healthGroup: "1 основная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "free",
+      profile: "base",
+      mother: { name: "Ковалева Диана Владимировна", phone: "9914843", work: "ИП", edu: "special_sec", job: "ip" },
+      father: { name: "Бабичев Даниил Юрьевич", phone: "+37529 156-05-08", work: "БМЗ", edu: "prof_tech", job: "worker" }
+    }, {
+      id: "s3",
+      name: "Баженова Мирослава Андреевна",
+      dob: "19.01.2011",
+      gender: "female",
+      phone: "+375 44 471 8786",
+      address: "Ул. Белорусская, д. 1",
+      healthGroup: "1 основная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: true,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: true,
+      singleParentReason: "Мать-одиночка",
+      meal: "paid",
+      profile: "pedagogical",
+      mother: { name: "Баженова Елена Александровна", phone: "(29) 125 92 39", work: "Жлоб. Вагонное ДЕПО, оператор ПТО",
+        edu: "special_sec", job: "employee" },
+      father: { name: "", phone: "", work: "", edu: "none", job: "none" }
+    }, {
+      id: "s4",
+      name: "Бежелев Арсений Евгеньевич",
+      dob: "30.06.2009",
+      gender: "male",
+      phone: "(29)6185754",
+      address: "мк-он 16, д.10, кв. 65",
+      healthGroup: "2 подготовительная",
+      chronic: "Ребенок-инвалид",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: true,
+      disabilityDoc: "№ 0106363",
+      isGifted: false,
+      isHomeSchool: true,
+      homeSchoolReason: "Заключение МРЭК",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "free",
+      profile: "base",
+      mother: { name: "Мамонова Галина Ивановна", phone: "(29)6185754", work: "Жлобинский мясокомбинат, гл. специалист, д/о",
+        edu: "higher", job: "employee" },
+      father: { name: "", phone: "", work: "", edu: "none", job: "none" }
+    }, {
+      id: "s5",
+      name: "Былицкая Виктория Сергеевна",
+      dob: "22.06.2010",
+      gender: "female",
+      phone: "+375 29 390 1091",
+      address: "Б. Роги, ул. Роговская, д.14",
+      healthGroup: "2 подготовительная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: true,
+      chernobylDetails: "Брат Былицкий Алексей Сергеевич",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "paid",
+      profile: "base",
+      mother: { name: "Былицкая Татьяна Михайловна", phone: "044 711 07 42", work: "Швейная ф-ка, рабочая линии спецодежды",
+        edu: "prof_tech", job: "worker" },
+      father: { name: "Былиций Сергей Павлович", phone: "+37529 5237824", work: "Металлургтранс, рабочий", edu: "prof_tech",
+        job: "worker" }
+    }, {
+      id: "s6",
+      name: "Жиренкова Вера Михайловна",
+      dob: "31.07.2010",
+      gender: "female",
+      phone: "+375 44 563 8970",
+      address: "Чапаева, д.46-а",
+      healthGroup: "3 ЛФК",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: true,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "paid",
+      profile: "pedagogical",
+      mother: { name: "Жиренкова Любовь Николаевна", phone: "+37544 579 32 31", work: "Белгазпромбанк, нач. ЦБУ",
+        edu: "higher", job: "employee" },
+      father: { name: "Жиренков Михаил Николаевич", phone: "+37544 570 19 81", work: "СТУП «Жлобинметаллургстрой», инженер",
+        edu: "higher", job: "employee" }
+    }, {
+      id: "s7",
+      name: "Жуков Илья Юрьевич",
+      dob: "21.06.2011",
+      gender: "male",
+      phone: "+375 44 473 0421",
+      address: "Чехова, 22а",
+      healthGroup: "2 основная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "paid",
+      profile: "base",
+      mother: { name: "Жукова Наталья Викторовна", phone: "+37529 140 60 88", work: "Жлоб.Департамент охр.МВД РБ, бухгалтер",
+        edu: "higher", job: "employee" },
+      father: { name: "Жуков Юрий Петрович", phone: "", work: "ОАО БМЗ, электромонтёр", edu: "prof_tech", job: "worker" }
+    }, {
+      id: "s8",
+      name: "Ибрагимова Вероника Вячеславовна",
+      dob: "06.04.2010",
+      gender: "female",
+      phone: "",
+      address: "Д. Белица, ул. Комсомольская, д. 36",
+      healthGroup: "3 СМГ",
+      chronic: "миопия",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "free",
+      profile: "base",
+      mother: { name: "Кизеева Марина Сергеевна", phone: "", work: "СШ№5, библиотекарь", edu: "special_sec",
+        job: "employee" },
+      father: { name: "Кизеев Олег Тимофеевич", phone: "", work: "БМЗ, бригадир", edu: "prof_tech", job: "worker" }
+    }, {
+      id: "s9",
+      name: "Иванова Александра Евгеньевна",
+      dob: "10.09.2010",
+      gender: "female",
+      phone: "+375 29 108 7647",
+      address: "Первомайская д.12а кв. 36",
+      healthGroup: "1 основная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "paid",
+      profile: "base",
+      mother: { name: "Иванова Татьяна Владимировна", phone: "+37529 648 01 53", work: "БМЗ", edu: "special_sec",
+        job: "worker" },
+      father: { name: "Иванов Евгений Эдуардович", phone: "", work: "БМЗ", edu: "prof_tech", job: "worker" }
+    }, {
+      id: "s10",
+      name: "Кастунова Ульяна Андреевна",
+      dob: "03.01.2011",
+      gender: "female",
+      phone: "+375 44 517 7670",
+      address: "Ул. Бартошова д. 13 кв. 87",
+      healthGroup: "подготовительная",
+      chronic: "Остаточная дисплазия",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "free",
+      profile: "pedagogical",
+      mother: { name: "Кастунова Татьяна Александровна", phone: "", work: "УЗ «Жлоб. ЦРБ», медсестра", edu: "special_sec",
+        job: "employee" },
+      father: { name: "Кастунов Андрей Васильевич", phone: "", work: "ГЦК, методист", edu: "higher", job: "employee" }
+    }, {
+      id: "s11",
+      name: "Конон Мария Дмитриевна",
+      dob: "04.07.2010",
+      gender: "female",
+      phone: "+375 44 725 1471",
+      address: "Первомайская, д. 23, кв.9",
+      healthGroup: "2 подготовительная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: true,
+      largeFamilyDetails: "Конон Анна, Конон Екатерина (СШ №5)",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "free",
+      profile: "base",
+      mother: { name: "Конон Наталья Николаевна", phone: "8029 663 86 22", work: "ЦРБ, санитарка", edu: "secondary",
+        job: "worker" },
+      father: { name: "Конон Дмитрий Владимирович", phone: "029 533 60 37", work: "Трест № 40, бетонщик", edu: "prof_tech",
+        job: "worker" }
+    }, {
+      id: "s12",
+      name: "Курбацкий Олег Вадимович",
+      dob: "05.11.2010",
+      gender: "male",
+      phone: "+375 29 938 4956",
+      address: "2-ой первомайский переулок, д.8 кв. 1 / Волкова, 22/3",
+      healthGroup: "2 подготовительная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: true,
+      singleParentReason: "Развод",
+      meal: "paid",
+      profile: "base",
+      mother: { name: "Курбацкая Татьяна Викторовна", phone: "29-316-68-22", work: "ООО «ОКА», оператор автомат. линий",
+        edu: "prof_tech", job: "worker" },
+      father: { name: "", phone: "", work: "", edu: "none", job: "none" }
+    }, {
+      id: "s13",
+      name: "Милка Владислав Леонидович",
+      dob: "06.10.2010",
+      gender: "male",
+      phone: "+375 44 534 3765",
+      address: "Войкова, д.27, кв.21",
+      healthGroup: "2 основная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "paid",
+      profile: "base",
+      mother: { name: "Милка Татьяна Рамуальдовна", phone: "8029 125 92 38", work: "ЦРБ, санитарка", edu: "secondary",
+        job: "worker" },
+      father: { name: "Милка Леонид Иванович", phone: "44 137 94 17", work: "Жлобин Водоканал, водитель", edu: "prof_tech",
+        job: "worker" }
+    }, {
+      id: "s14",
+      name: "Посульченко Василиса Александровна",
+      dob: "27.01.2011",
+      gender: "female",
+      phone: "+375 44 579 5520",
+      address: "Фоканова,7/2",
+      healthGroup: "1 основная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: true,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "paid",
+      profile: "pedagogical",
+      mother: { name: "Чернякова Олеся Сергеевна", phone: "29 649 85 77", work: "Энергосбыт, РУП Гомельэнерго, бухгалтер",
+        edu: "higher", job: "employee" },
+      father: { name: "Черняков Максим Алексеевич (отчим)", phone: "29 695 76 04", work: "Работает в РФ", edu: "special_sec",
+        job: "unregistered" }
+    }, {
+      id: "s15",
+      name: "Обухов Арсений Андреевич",
+      dob: "26.05.2011",
+      gender: "male",
+      phone: "",
+      address: "Ул. Рогачевская д. 15а кв. 26",
+      healthGroup: "основная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "paid",
+      profile: "base",
+      mother: { name: "Обухова Елена Григорьевна", phone: "", work: "ИП", edu: "special_sec", job: "ip" },
+      father: { name: "Обухов Андрей Николаевич", phone: "", work: "Жлобинские электрические сети, мастер", edu: "higher",
+        job: "employee" }
+    }, {
+      id: "s16",
+      name: "Протираев Никита Владимирович",
+      dob: "21.09.2010",
+      gender: "male",
+      phone: "+375 29 910 6999",
+      address: "Советская, д. 74",
+      healthGroup: "2 основная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: true,
+      largeFamilyDetails: "3 детей в семье",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "free",
+      profile: "base",
+      mother: { name: "Гендрусева Ксения Сергеевна", phone: "+375 29 19372 39", work: "д/о", edu: "special_sec",
+        job: "unemployed" },
+      father: { name: "Гендрусев Дмитрий Геннадьевич", phone: "", work: "ОАО БМЗ, ЭСПЦ-2, эл.монтёр", edu: "prof_tech",
+        job: "worker" }
+    }, {
+      id: "s17",
+      name: "Савицкая Полина Павловна",
+      dob: "19.03.2011",
+      gender: "female",
+      phone: "+375 44 572 1119",
+      address: "мн. 1 д. 8 - 86 / Первомайская 20/10",
+      healthGroup: "1 основная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: true,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: true,
+      largeFamilyDetails: "3 детей в семье",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "free",
+      profile: "pedagogical",
+      mother: { name: "Панок Анастасия Ивановна", phone: "+375 44 545 25 45", work: "Жлобинская райветстанция, врач-ветеринар",
+        edu: "higher", job: "employee" },
+      father: { name: "Савицкий Павел Васильевич", phone: "+375 25 941 11 99", work: "КУП ДРОЦ «Пралеска», техник-массажист",
+        edu: "special_sec", job: "employee" }
+    }, {
+      id: "s18",
+      name: "Тарасенко Карина Витальевна",
+      dob: "09.07.2011",
+      gender: "female",
+      phone: "+375 44 512 2007",
+      address: "Котовского, д. 20",
+      healthGroup: "3 СМГ",
+      chronic: "миопия",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: true,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "paid",
+      profile: "pedagogical",
+      mother: { name: "Тарасенко Марина Михайловна", phone: "29 633 66 72", work: "ОАО БМЗ, ТПЦ, машинист крана",
+        edu: "prof_tech", job: "worker" },
+      father: { name: "Тарасенко Виталий Александрович", phone: "29 691 44 29", work: "НКФО “Белинкассгрупп”, водитель",
+        edu: "prof_tech", job: "worker" }
+    }, {
+      id: "s19",
+      name: "Татаринов Кирилл Александрович",
+      dob: "12.01.2010",
+      gender: "male",
+      phone: "+375 25 528 3638",
+      address: "М-н2, д.6, кв.4",
+      healthGroup: "2 основная",
+      chronic: "аллергия",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "paid",
+      profile: "base",
+      mother: { name: "Маркина Екатерина Николаевна", phone: "", work: "ОАО «Эльфтрейд», продавец", edu: "secondary",
+        job: "worker" },
+      father: { name: "Маркин Евгений Игоревич (отчим)", phone: "", work: "ОАО «БМЗ», ЭСПЦ-1, слесарь-рем.", edu: "prof_tech",
+        job: "worker" }
+    }, {
+      id: "s20",
+      name: "Усенкова Мария Максимовна",
+      dob: "06.08.2010",
+      gender: "female",
+      phone: "+375 29 171 0608",
+      address: "ул. Ленинская, д. 13",
+      healthGroup: "3 СМГ",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "free",
+      profile: "base",
+      mother: { name: "Усенкова Наталья Валерьевна", phone: "+375447004115", work: "УП «Жлобинметаллургстрой», оператор ПВЭМ",
+        edu: "special_sec", job: "employee" },
+      father: { name: "Усенков Максим Александрович", phone: "+375291214690", work: "СООО «БМЗ-ГКС», Наладчик КИПиА",
+        edu: "higher", job: "worker" }
+    }, {
+      id: "s21",
+      name: "Филимонова Екатерина Андреевна",
+      dob: "01.03.2011",
+      gender: "female",
+      phone: "5-84-91",
+      address: "Лермонтова д.3",
+      healthGroup: "2 основная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: false,
+      largeFamilyDetails: "",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "paid",
+      profile: "base",
+      mother: { name: "Захарина Лариса Васильевна", phone: "029-3293398", work: "«Фермер», продавец", edu: "secondary",
+        job: "worker" },
+      father: { name: "Филимонов Андрей Геннадьевич", phone: "0445199651", work: "Ремесленник", edu: "special_sec",
+        job: "ip" }
+    }, {
+      id: "s22",
+      name: "Шепалова Вероника Сергеевна",
+      dob: "22.09.2010",
+      gender: "female",
+      phone: "",
+      address: "Ул. Полевая д. 57 кв. 72",
+      healthGroup: "2 основная",
+      chronic: "",
+      org: "БРСМ",
+      isSop: false,
+      isIpr: false,
+      isFoster: false,
+      isRisk: false,
+      isDisabled: false,
+      disabilityDoc: "",
+      isGifted: false,
+      isHomeSchool: false,
+      homeSchoolReason: "",
+      isChernobyl: false,
+      chernobylDetails: "",
+      isLowIncome: false,
+      isLargeFamily: true,
+      largeFamilyDetails: "Шепалов Тарас (2008), Шепалова Есения (2019)",
+      isSingleParent: false,
+      singleParentReason: "",
+      meal: "paid",
+      profile: "pedagogical",
+      mother: { name: "Шепалова Ирина Васильевна", phone: "+375292373814", work: "ЦТДиМ «Эврика», зав. Отделением",
+        edu: "higher", job: "employee" },
+      father: { name: "Шепалов Сергей Александрович", phone: "", work: "ОАО «Белфа», системный программист", edu: "higher",
+        job: "employee" }
+    }];
+
+    let students = [];
+    let settings = {
+      className: "9 «А»",
+      academicYear: "2025-2026",
+      teacher: "Барейша Илья Александрович"
+    };
+
+    window.onload = function() {
+      loadFromLocalStorage();
+      updateAllUI();
+    };
+
+    function loadFromLocalStorage() {
+      try {
+        const savedStudents = localStorage.getItem('social_passport_students');
+        const savedSettings = localStorage.getItem('social_passport_settings');
+        students = savedStudents ? JSON.parse(savedStudents) : DEFAULT_STUDENTS;
+        if (savedSettings) settings = JSON.parse(savedSettings);
+      } catch (e) {
+        students = DEFAULT_STUDENTS;
+      }
+    }
+
+    function saveToLocalStorage() {
+      localStorage.setItem('social_passport_students', JSON.stringify(students));
+      localStorage.setItem('social_passport_settings', JSON.stringify(settings));
+    }
+
+    function sortStudents() {
+      students.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+    }
+
+    function updateAllUI() {
+      // update text headers
+      document.getElementById('classBadge').textContent = settings.className;
+      document.getElementById('teacherHeader').textContent = `Кл. руководитель: ${settings.teacher}`;
+      document.getElementById('tabCountStudents').textContent = students.length;
+
+      // official doc headers
+      document.getElementById('docClassName').textContent = settings.className;
+      document.getElementById('docAcademicYear').textContent = settings.academicYear;
+      document.getElementById('docTeacherName').textContent = settings.teacher;
+      document.getElementById('docSignatureTeacher').textContent = getShortName(settings.teacher);
+
+      // settings inputs
+      document.getElementById('settingClassName').value = settings.className;
+      document.getElementById('settingAcademicYear').value = settings.academicYear;
+      document.getElementById('settingTeacher').value = settings.teacher;
+
+      renderDashboard();
+      renderStudentsTable();
+      renderCategoriesList();
+      renderOfficialDocument();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('text-blue-600', 'bg-blue-50', 'font-semibold');
+        btn.classList.add('text-slate-600');
+      });
+
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-${tabId}-btn`);
+      if (activeBtn) {
+        activeBtn.classList.add('text-blue-600', 'bg-blue-50', 'font-semibold');
+      }
+    }
+
+    function calculateStats() {
+      const stats = {
+        total: students.length,
+        boys: students.filter(s => s.gender === 'male').length,
+        girls: students.filter(s => s.gender === 'female').length,
+        sop: students.filter(s => s.isSop).length,
+        ipr: students.filter(s => s.isIpr).length,
+        foster: students.filter(s => s.isFoster).length,
+        risk: students.filter(s => s.isRisk).length,
+        disabled: students.filter(s => s.isDisabled).length,
+        gifted: students.filter(s => s.isGifted).length,
+        homeSchool: students.filter(s => s.isHomeSchool).length,
+        chernobyl: students.filter(s => s.isChernobyl).length,
+        large: students.filter(s => s.isLargeFamily).length,
+        single: students.filter(s => s.isSingleParent).length,
+        lowIncome: students.filter(s => s.isLowIncome).length,
+        brpo: students.filter(s => s.org === 'БРПО').length,
+        brsm: students.filter(s => s.org === 'БРСМ').length,
+        oct: students.filter(s => s.org === 'Октябрята').length,
+        mealPaid: students.filter(s => s.meal === 'paid').length,
+        mealFree: students.filter(s => s.meal === 'free').length,
+        mealNone: students.filter(s => s.meal === 'none').length,
+        profileBase: students.filter(s => s.profile === 'base').length,
+        profilePed: students.filter(s => s.profile === 'pedagogical').length,
+
+        // Education stats (Mother / Father)
+        mEdu: { unfin_sec: 0, secondary: 0, special_sec: 0, prof_tech: 0, higher: 0 },
+        fEdu: { unfin_sec: 0, secondary: 0, special_sec: 0, prof_tech: 0, higher: 0 },
+
+        // Employment stats (Mother / Father)
+        mJob: { ip: 0, worker: 0, employee: 0, unregistered: 0, unemployed: 0 },
+        fJob: { ip: 0, worker: 0, employee: 0, unregistered: 0, unemployed: 0 }
+      };
+
+      students.forEach(s => {
+        if (s.mother && s.mother.edu && stats.mEdu[s.mother.edu] !== undefined) stats.mEdu[s.mother.edu]++;
+        if (s.father && s.father.edu && stats.fEdu[s.father.edu] !== undefined) stats.fEdu[s.father.edu]++;
+
+        if (s.mother && s.mother.job && stats.mJob[s.mother.job] !== undefined) stats.mJob[s.mother.job]++;
+        if (s.father && s.father.job && stats.fJob[s.father.job] !== undefined) stats.fJob[s.father.job]++;
+      });
+
+      return stats;
+    }
+
+    function renderDashboard() {
+      const s = calculateStats();
+
+      // Cards
+      document.getElementById('statTotal').textContent = s.total;
+      document.getElementById('statBoys').textContent = s.boys;
+      document.getElementById('statGirls').textContent = s.girls;
+      document.getElementById('statLarge').textContent = s.large;
+      document.getElementById('statSingle').textContent = s.single;
+      document.getElementById('statRisk').textContent = s.risk + s.sop + s.ipr;
+      document.getElementById('statDisabled').textContent = s.disabled;
+      document.getElementById('statGifted').textContent = s.gifted;
+
+      // Nutrition cards
+      document.getElementById('statMealPaid').textContent = s.mealPaid;
+      document.getElementById('statMealFree').textContent = s.mealFree;
+      document.getElementById('statMealNone').textContent = s.mealNone;
+
+      // Profile cards
+      document.getElementById('statProfileBase').textContent = s.profileBase;
+      document.getElementById('statProfilePed').textContent = s.profilePed;
+
+      // Dashboard Summary Table
+      const dashSummary = `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="border border-slate-200 p-2 font-bold text-blue-600">${settings.className.replace(/[^0-9]/g, '') || '9'}</td>
+          <td class="border border-slate-200 p-2 font-bold">${s.total}</td>
+          <td class="border border-slate-200 p-2">${s.girls}</td>
+          <td class="border border-slate-200 p-2">${s.boys}</td>
+          <td class="border border-slate-200 p-2">${s.sop || '-'}</td>
+          <td class="border border-slate-200 p-2">${s.ipr || '-'}</td>
+          <td class="border border-slate-200 p-2">${s.foster || '-'}</td>
+          <td class="border border-slate-200 p-2">${s.risk || '-'}</td>
+          <td class="border border-slate-200 p-2">${s.disabled || '-'}</td>
+          <td class="border border-slate-200 p-2">${s.brpo || '-'}</td>
+          <td class="border border-slate-200 p-2">${s.brsm || '-'}</td>
+          <td class="border border-slate-200 p-2">${s.oct || '-'}</td>
+          <td class="border border-slate-200 p-2">${s.mealPaid || '-'}</td>
+          <td class="border border-slate-200 p-2">${s.mealFree || '-'}</td>
+          <td class="border border-slate-200 p-2">${s.mealNone || '-'}</td>
+          <td class="border border-slate-200 p-2">${s.profileBase || '-'}</td>
+          <td class="border border-slate-200 p-2">${s.profilePed || '-'}</td>
+        </tr>
+      `;
+      document.getElementById('dashTableSummary').innerHTML = dashSummary;
+
+      // Dashboard Family Breakdown Table
+      const dashFamilies = `
+        <tr class="hover:bg-slate-50 transition-colors text-center">
+          <td class="border border-slate-200 p-2 font-semibold text-emerald-600">${s.large || '-'}</td>
+          <td class="border border-slate-200 p-2">${s.lowIncome || '-'}</td>
+          <td class="border border-slate-200 p-2 font-semibold text-blue-600">${s.single || '-'}</td>
+          <td class="border border-slate-200 p-2">${s.single || '-'}</td>
+          <td class="border border-slate-200 p-2 text-rose-600 font-bold">${s.sop || '-'}</td>
+
+          <!-- Mother Edu -->
+          <td class="border border-slate-200 p-1">${s.mEdu.unfin_sec || '-'}</td>
+          <td class="border border-slate-200 p-1">${s.mEdu.secondary || '-'}</td>
+          <td class="border border-slate-200 p-1">${s.mEdu.special_sec || '-'}</td>
+          <td class="border border-slate-200 p-1">${s.mEdu.prof_tech || '-'}</td>
+          <td class="border border-slate-200 p-1 font-semibold">${s.mEdu.higher || '-'}</td>
+
+          <!-- Father Edu -->
+          <td class="border border-slate-200 p-1">${s.fEdu.unfin_sec || '-'}</td>
+          <td class="border border-slate-200 p-1">${s.fEdu.secondary || '-'}</td>
+          <td class="border border-slate-200 p-1">${s.fEdu.special_sec || '-'}</td>
+          <td class="border border-slate-200 p-1">${s.fEdu.prof_tech || '-'}</td>
+          <td class="border border-slate-200 p-1 font-semibold">${s.fEdu.higher || '-'}</td>
+
+          <!-- Mother Job -->
+          <td class="border border-slate-200 p-1">${s.mJob.ip || '-'}</td>
+          <td class="border border-slate-200 p-1">${s.mJob.worker || '-'}</td>
+          <td class="border border-slate-200 p-1">${s.mJob.employee || '-'}</td>
+          <td class="border border-slate-200 p-1">${s.mJob.unregistered || '-'}</td>
+          <td class="border border-slate-200 p-1">${s.mJob.unemployed || '-'}</td>
+
+          <!-- Father Job -->
+          <td class="border border-slate-200 p-1">${s.fJob.ip || '-'}</td>
+          <td class="border border-slate-200 p-1">${s.fJob.worker || '-'}</td>
+          <td class="border border-slate-200 p-1">${s.fJob.employee || '-'}</td>
+          <td class="border border-slate-200 p-1">${s.fJob.unregistered || '-'}</td>
+          <td class="border border-slate-200 p-1">${s.fJob.unemployed || '-'}</td>
+        </tr>
+      `;
+      document.getElementById('dashTableFamilies').innerHTML = dashFamilies;
+    }
+
+    function renderStudentsTable() {
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const filterCat = document.getElementById('filterCategory').value;
+      const filterGender = document.getElementById('filterGender').value;
+
+      const filtered = students.filter(s => {
+        // Gender filter
+        if (filterGender !== 'all' && s.gender !== filterGender) return false;
+
+        // Category filter
+        if (filterCat !== 'all' && !s[filterCat]) return false;
+
+        // Search text
+        if (search) {
+          const mName = s.mother ? s.mother.name : '';
+          const fName = s.father ? s.father.name : '';
+          const fullStr = `${s.name} ${s.dob} ${s.address} ${s.phone} ${mName} ${fName}`.toLowerCase();
+          if (!fullStr.includes(search)) return false;
+        }
+
+        return true;
+      });
+
+      const tbody = document.getElementById('studentsTableBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML =
+        `<tr><td colspan="9" class="text-center py-8 text-slate-400">Учащиеся по заданным критериям не найдены</td></tr>`;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach((s, idx) => {
+        const tags = [];
+        if (s.isLargeFamily) tags.push(
+          '<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-medium">Многодетные</span>'
+          );
+        if (s.isSingleParent) tags.push(
+          '<span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded font-medium">Неполная</span>');
+        if (s.isGifted) tags.push(
+          '<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-medium">Одаренный</span>');
+        if (s.isDisabled) tags.push(
+          '<span class="bg-purple-100 text-purple-800 text-[10px] px-2 py-0.5 rounded font-medium">Инвалид</span>');
+        if (s.isRisk) tags.push(
+          '<span class="bg-rose-100 text-rose-800 text-[10px] px-2 py-0.5 rounded font-medium">Гр. риска</span>');
+        if (s.isHomeSchool) tags.push(
+          '<span class="bg-indigo-100 text-indigo-800 text-[10px] px-2 py-0.5 rounded font-medium">Надомное</span>');
+        if (s.isChernobyl) tags.push(
+          '<span class="bg-cyan-100 text-cyan-800 text-[10px] px-2 py-0.5 rounded font-medium">Чернобылец</span>');
+
+        const mealMap = { paid: '🍽️ Платное', free: '🆓 Бесплатное', none: '🚫 Не питается' };
+        const profileMap = { base: '📚 Базовый', pedagogical: '🧑‍🏫 Педагогический' };
+
+        const parentsInfo = [];
+        if (s.mother && s.mother.name) {
+          parentsInfo.push(
+            `<div><strong>Мать:</strong> ${s.mother.name} ${s.mother.phone ? ' (' + s.mother.phone + ')' : ''}<br><span class="text-slate-500 text-[11px]">${s.mother.work || ''}</span></div>`
+            );
+        }
+        if (s.father && s.father.name) {
+          parentsInfo.push(
+            `<div><strong>Отец:</strong> ${s.father.name} ${s.father.phone ? ' (' + s.father.phone + ')' : ''}<br><span class="text-slate-500 text-[11px]">${s.father.work || ''}</span></div>`
+            );
+        }
+
+        html += `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="py-3 px-3 text-center font-bold text-slate-400 text-xs">${idx + 1}</td>
+            <td class="py-3 px-4">
+              <div class="font-bold text-slate-900">${s.name}</div>
+              <div class="text-xs text-slate-500 flex items-center gap-2 mt-0.5">
+                <span>🎂 ${s.dob || '—'}</span>
+                <span class="text-slate-300">•</span>
+                <span>${s.gender === 'male' ? '👦 Мальчик' : '👧 Девочка'}</span>
+                ${s.org && s.org !== 'none' ? `<span class="bg-slate-100 border text-slate-600 px-1.5 rounded text-[10px]">${s.org}</span>` : ''}
+              </div>
+            </td>
+            <td class="py-3 px-4 text-xs">
+              <div class="text-slate-800"><i class="fa-solid fa-location-dot text-slate-400 mr-1"></i> ${s.address || '—'}</div>
+              <div class="text-slate-500 mt-1"><i class="fa-solid fa-phone text-slate-400 mr-1"></i> ${s.phone || '—'}</div>
+            </td>
+            <td class="py-3 px-3 text-center text-xs">
+              <span class="inline-block px-2 py-1 bg-slate-100 rounded font-medium text-slate-700">${s.healthGroup || '1'}</span>
+              ${s.chronic ? `<div class="text-[10px] text-rose-600 mt-1">${s.chronic}</div>` : ''}
+            </td>
+            <td class="py-3 px-4 text-xs space-y-1">
+              ${parentsInfo.join('') || '<span class="text-slate-400">Нет данных</span>'}
+            </td>
+            <td class="py-3 px-3 text-center text-xs font-medium">
+              <span class="inline-block px-2 py-1 rounded ${s.meal === 'paid' ? 'bg-emerald-100 text-emerald-700' : s.meal === 'free' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}">
+                ${mealMap[s.meal] || '—'}
+              </span>
+            </td>
+            <td class="py-3 px-3 text-center text-xs font-medium">
+              <span class="inline-block px-2 py-1 rounded ${s.profile === 'pedagogical' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-700'}">
+                ${profileMap[s.profile] || '—'}
+              </span>
+            </td>
+            <td class="py-3 px-3 text-center">
+              <div class="flex flex-wrap gap-1 justify-center max-w-[150px]">
+                ${tags.join('') || '<span class="text-slate-300 text-xs">—</span>'}
+              </div>
+            </td>
+            <td class="py-3 px-3 text-right no-print">
+              <div class="flex items-center justify-end gap-1">
+                <button onclick="editStudent('${s.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Редактировать">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button onclick="deleteStudent('${s.id}')" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Удалить">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function renderCategoriesList() {
+      const renderCardGroup = (elementId, countBadgeId, items, formatter) => {
+        document.getElementById(countBadgeId).textContent = items.length;
+        const container = document.getElementById(elementId);
+        if (items.length === 0) {
+          container.innerHTML = `<p class="text-slate-400 italic text-center py-2">— Нет данных —</p>`;
+          return;
+        }
+        container.innerHTML = items.map(s => formatter(s)).join('');
+      };
+
+      // Risk
+      renderCardGroup('listRisk', 'badgeRiskCount', students.filter(s => s.isRisk || s.isSop || s.isIpr), s => `
+        <div class="p-2.5 bg-rose-50/50 border border-rose-100 rounded-lg">
+          <div class="font-bold text-slate-900">${s.name} (${s.dob})</div>
+          <div class="text-slate-600 text-[11px] mt-0.5">Адрес: ${s.address}</div>
+          <div class="text-rose-700 font-medium text-[11px] mt-1">
+            ${s.isSop ? '🚨 СОП ' : ''} ${s.isIpr ? '📋 ИПР ' : ''} ${s.isRisk ? '⚠️ Группа риска' : ''}
+          </div>
+        </div>
+      `);
+
+      // Disability & Home School
+      renderCardGroup('listDisabled', 'badgeDisabledCount', students.filter(s => s.isDisabled || s.isHomeSchool), s => `
+        <div class="p-2.5 bg-purple-50/50 border border-purple-100 rounded-lg">
+          <div class="font-bold text-slate-900">${s.name} (${s.dob})</div>
+          <div class="text-slate-600 text-[11px] mt-0.5">Документ/Заключение: <strong>${s.disabilityDoc || s.homeSchoolReason || 'Инвалидность'}</strong></div>
+          <div class="text-slate-500 text-[11px]">Мать: ${s.mother ? s.mother.name : '—'}</div>
+        </div>
+      `);
+
+      // Gifted
+      renderCardGroup('listGifted', 'badgeGiftedCount', students.filter(s => s.isGifted), s => `
+        <div class="p-2.5 bg-amber-50/50 border border-amber-100 rounded-lg">
+          <div class="font-bold text-slate-900">${s.name} (${s.dob})</div>
+          <div class="text-slate-600 text-[11px] mt-0.5">Родители: ${s.mother ? s.mother.name : ''} / ${s.father ? s.father.name : ''}</div>
+        </div>
+      `);
+
+      // Large
+      renderCardGroup('listLarge', 'badgeLargeCount', students.filter(s => s.isLargeFamily), s => `
+        <div class="p-2.5 bg-emerald-50/50 border border-emerald-100 rounded-lg">
+          <div class="font-bold text-slate-900">${s.name} (${s.dob})</div>
+          <div class="text-slate-600 text-[11px] mt-0.5">Дети в семье: ${s.largeFamilyDetails || '3+ детей'}</div>
+          <div class="text-slate-500 text-[11px]">Родители: ${s.mother ? s.mother.name : ''}, ${s.father ? s.father.name : ''}</div>
+        </div>
+      `);
+
+      // Single Parent
+      renderCardGroup('listSingle', 'badgeSingleCount', students.filter(s => s.isSingleParent), s => `
+        <div class="p-2.5 bg-blue-50/50 border border-blue-100 rounded-lg">
+          <div class="font-bold text-slate-900">${s.name} (${s.dob})</div>
+          <div class="text-blue-700 font-medium text-[11px] mt-0.5">Причина: ${s.singleParentReason || 'Неполная семья'}</div>
+          <div class="text-slate-500 text-[11px]">Воспитывает: ${s.mother && s.mother.name ? 'Мать (' + s.mother.name + ')' : (s.father ? 'Отец (' + s.father.name + ')' : '')}</div>
+        </div>
+      `);
+
+      // Chernobyl
+      renderCardGroup('listChernobyl', 'badgeChernobylCount', students.filter(s => s.isChernobyl), s => `
+        <div class="p-2.5 bg-cyan-50/50 border border-cyan-100 rounded-lg">
+          <div class="font-bold text-slate-900">${s.name} (${s.dob})</div>
+          <div class="text-slate-600 text-[11px] mt-0.5">Детали: ${s.chernobylDetails || 'Чернобыльцы/Переселенцы'}</div>
+        </div>
+      `);
+    }
+
+    function renderOfficialDocument() {
+      const s = calculateStats();
+
+      document.getElementById('docTotalCount').textContent = s.total;
+      document.getElementById('docBoysCount').textContent = s.boys;
+      document.getElementById('docGirlsCount').textContent = s.girls;
+
+      // Summary row
+      document.getElementById('officialSummaryRow').innerHTML = `
+        <tr>
+          <td class="border border-slate-800 p-1 font-bold">${settings.className.replace(/[^0-9]/g, '') || '9'}</td>
+          <td class="border border-slate-800 p-1 font-bold">${s.total}</td>
+          <td class="border border-slate-800 p-1">${s.girls}</td>
+          <td class="border border-slate-800 p-1">${s.boys}</td>
+          <td class="border border-slate-800 p-1">${s.sop || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.ipr || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.foster || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.risk || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.disabled || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.brpo || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.brsm || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.oct || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.mealPaid || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.mealFree || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.mealNone || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.profileBase || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.profilePed || '-'}</td>
+        </tr>
+      `;
+
+      // Families breakdown row
+      document.getElementById('officialFamiliesRow').innerHTML = `
+        <tr>
+          <td class="border border-slate-800 p-1">${s.large || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.lowIncome || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.single || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.single || '-'}</td>
+          <td class="border border-slate-800 p-1">${s.sop || '-'}</td>
+
+          <td class="border border-slate-800 p-0.5">${s.mEdu.unfin_sec || '-'}</td>
+          <td class="border border-slate-800 p-0.5">${s.mEdu.secondary || '-'}</td>
+          <td class="border border-slate-800 p-0.5">${s.mEdu.special_sec || '-'}</td>
+          <td class="border border-slate-800 p-0.5">${s.mEdu.prof_tech || '-'}</td>
+          <td class="border border-slate-800 p-0.5 font-bold">${s.mEdu.higher || '-'}</td>
+
+          <td class="border border-slate-800 p-0.5">${s.fEdu.unfin_sec || '-'}</td>
+          <td class="border border-slate-800 p-0.5">${s.fEdu.secondary || '-'}</td>
+          <td class="border border-slate-800 p-0.5">${s.fEdu.special_sec || '-'}</td>
+          <td class="border border-slate-800 p-0.5">${s.fEdu.prof_tech || '-'}</td>
+          <td class="border border-slate-800 p-0.5 font-bold">${s.fEdu.higher || '-'}</td>
+
+          <td class="border border-slate-800 p-0.5">${s.mJob.ip || '-'}</td>
+          <td class="border border-slate-800 p-0.5">${s.mJob.worker || '-'}</td>
+          <td class="border border-slate-800 p-0.5">${s.mJob.employee || '-'}</td>
+          <td class="border border-slate-800 p-0.5">${s.mJob.unregistered || '-'}</td>
+          <td class="border border-slate-800 p-0.5">${s.mJob.unemployed || '-'}</td>
+
+          <td class="border border-slate-800 p-0.5">${s.fJob.ip || '-'}</td>
+          <td class="border border-slate-800 p-0.5">${s.fJob.worker || '-'}</td>
+          <td class="border border-slate-800 p-0.5">${s.fJob.employee || '-'}</td>
+          <td class="border border-slate-800 p-0.5">${s.fJob.unregistered || '-'}</td>
+          <td class="border border-slate-800 p-0.5">${s.fJob.unemployed || '-'}</td>
+        </tr>
+      `;
+
+      // Official Student Roster Table
+      let rosterHtml = '';
+      students.forEach((st, idx) => {
+        let parentStr = '';
+        if (st.mother && st.mother.name) {
+          parentStr += `Мать: ${st.mother.name}, ${st.mother.work || ''} ${st.mother.phone ? '(' + st.mother.phone + ')' : ''}`;
+        }
+        if (st.father && st.father.name) {
+          if (parentStr) parentStr += '<br>';
+          parentStr += `Отец: ${st.father.name}, ${st.father.work || ''} ${st.father.phone ? '(' + st.father.phone + ')' : ''}`;
+        }
+
+        const mealMap = { paid: 'Платное', free: 'Бесплатное', none: 'Не питается' };
+        const profileMap = { base: 'Базовый', pedagogical: 'Педагогический' };
+
+        rosterHtml += `
+          <tr>
+            <td class="border border-slate-800 p-1 text-center font-bold">${idx + 1}</td>
+            <td class="border border-slate-800 p-1 font-semibold">${st.name}, ${st.dob}</td>
+            <td class="border border-slate-800 p-1">${st.address || ''} ${st.phone ? '<br>т. ' + st.phone : ''}</td>
+            <td class="border border-slate-800 p-1 text-center">${st.healthGroup || '1'}</td>
+            <td class="border border-slate-800 p-1 text-center">${st.chronic || '-'}</td>
+            <td class="border border-slate-800 p-1">${parentStr || '—'}</td>
+            <td class="border border-slate-800 p-1 text-center">${mealMap[st.meal] || '—'}</td>
+            <td class="border border-slate-800 p-1 text-center">${profileMap[st.profile] || '—'}</td>
+          </tr>
+        `;
+      });
+      document.getElementById('officialRosterTable').innerHTML = rosterHtml;
+
+      // Special Categorized Sub-Tables
+      renderOfficialSubTables();
+    }
+
+    function renderOfficialSubTables() {
+      const specContainer = document.getElementById('officialSpecialTables');
+
+      const gifted = students.filter(s => s.isGifted);
+      const large = students.filter(s => s.isLargeFamily);
+      const single = students.filter(s => s.isSingleParent);
+      const disabled = students.filter(s => s.isDisabled || s.isHomeSchool);
+      const chernobyl = students.filter(s => s.isChernobyl);
+
+      let html = '';
+
+      // Gifted table
+      html += `
+        <div class="page-break">
+          <h4 class="text-xs font-bold uppercase mb-1">4. Список одаренных детей</h4>
+          <table class="w-full text-[10px] border-collapse border border-slate-800">
+            <thead class="bg-slate-100 font-bold text-center">
+              <tr>
+                <th class="border border-slate-800 p-1 w-6">№</th>
+                <th class="border border-slate-800 p-1">Ф.И.О. ученика</th>
+                <th class="border border-slate-800 p-1">Дата рождения</th>
+                <th class="border border-slate-800 p-1">Адрес, тел.</th>
+                <th class="border border-slate-800 p-1">Ф.И.О. родителей, место работы</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${gifted.length ? gifted.map((g, i) => `
+                <tr>
+                  <td class="border border-slate-800 p-1 text-center">${i+1}</td>
+                  <td class="border border-slate-800 p-1 font-bold">${g.name}</td>
+                  <td class="border border-slate-800 p-1 text-center">${g.dob}</td>
+                  <td class="border border-slate-800 p-1">${g.address}</td>
+                  <td class="border border-slate-800 p-1">${g.mother ? g.mother.name : ''} / ${g.father ? g.father.name : ''}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="5" class="border border-slate-800 p-1 text-center italic">— нет —</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      // Large Families table
+      html += `
+        <div>
+          <h4 class="text-xs font-bold uppercase mb-1">5. Список многодетных семей</h4>
+          <table class="w-full text-[10px] border-collapse border border-slate-800">
+            <thead class="bg-slate-100 font-bold text-center">
+              <tr>
+                <th class="border border-slate-800 p-1 w-6">№</th>
+                <th class="border border-slate-800 p-1">Ф.И.О. ученика</th>
+                <th class="border border-slate-800 p-1">Дата рожд.</th>
+                <th class="border border-slate-800 p-1">Адрес, тел.</th>
+                <th class="border border-slate-800 p-1">Ф.И.О. родителей</th>
+                <th class="border border-slate-800 p-1">Дети в семье</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${large.length ? large.map((g, i) => `
+                <tr>
+                  <td class="border border-slate-800 p-1 text-center">${i+1}</td>
+                  <td class="border border-slate-800 p-1 font-bold">${g.name}</td>
+                  <td class="border border-slate-800 p-1 text-center">${g.dob}</td>
+                  <td class="border border-slate-800 p-1">${g.address}</td>
+                  <td class="border border-slate-800 p-1">${g.mother ? g.mother.name : ''}, ${g.father ? g.father.name : ''}</td>
+                  <td class="border border-slate-800 p-1">${g.largeFamilyDetails || '3+ детей'}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="6" class="border border-slate-800 p-1 text-center italic">— нет —</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      // Single Parent table
+      html += `
+        <div>
+          <h4 class="text-xs font-bold uppercase mb-1">6. Список неполных семей</h4>
+          <table class="w-full text-[10px] border-collapse border border-slate-800">
+            <thead class="bg-slate-100 font-bold text-center">
+              <tr>
+                <th class="border border-slate-800 p-1 w-6">№</th>
+                <th class="border border-slate-800 p-1">Ф.И.О. ученика, дата рожд.</th>
+                <th class="border border-slate-800 p-1">Адрес, тел.</th>
+                <th class="border border-slate-800 p-1">Ф.И.О. родителя, место работы</th>
+                <th class="border border-slate-800 p-1">Причина отсутствия родителя</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${single.length ? single.map((g, i) => `
+                <tr>
+                  <td class="border border-slate-800 p-1 text-center">${i+1}</td>
+                  <td class="border border-slate-800 p-1 font-bold">${g.name}, ${g.dob}</td>
+                  <td class="border border-slate-800 p-1">${g.address}</td>
+                  <td class="border border-slate-800 p-1">${g.mother && g.mother.name ? g.mother.name + ' (' + (g.mother.work||'') + ')' : g.father.name}</td>
+                  <td class="border border-slate-800 p-1 font-semibold">${g.singleParentReason || 'Неполная'}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="5" class="border border-slate-800 p-1 text-center italic">— нет —</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      // Nutrition table
+      html += `
+        <div>
+          <h4 class="text-xs font-bold uppercase mb-1">7. Список по питанию</h4>
+          <table class="w-full text-[10px] border-collapse border border-slate-800">
+            <thead class="bg-slate-100 font-bold text-center">
+              <tr>
+                <th class="border border-slate-800 p-1 w-6">№</th>
+                <th class="border border-slate-800 p-1">Ф.И.О. ученика</th>
+                <th class="border border-slate-800 p-1">Дата рожд.</th>
+                <th class="border border-slate-800 p-1">Тип питания</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${students.length ? students.map((g, i) => `
+                <tr>
+                  <td class="border border-slate-800 p-1 text-center">${i+1}</td>
+                  <td class="border border-slate-800 p-1 font-bold">${g.name}</td>
+                  <td class="border border-slate-800 p-1 text-center">${g.dob}</td>
+                  <td class="border border-slate-800 p-1 text-center">${g.meal === 'paid' ? 'Платное' : g.meal === 'free' ? 'Бесплатное' : 'Не питается'}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="4" class="border border-slate-800 p-1 text-center italic">— нет —</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      // Profile table
+      html += `
+        <div>
+          <h4 class="text-xs font-bold uppercase mb-1">8. Список по профилю обучения</h4>
+          <table class="w-full text-[10px] border-collapse border border-slate-800">
+            <thead class="bg-slate-100 font-bold text-center">
+              <tr>
+                <th class="border border-slate-800 p-1 w-6">№</th>
+                <th class="border border-slate-800 p-1">Ф.И.О. ученика</th>
+                <th class="border border-slate-800 p-1">Дата рожд.</th>
+                <th class="border border-slate-800 p-1">Профиль</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${students.length ? students.map((g, i) => `
+                <tr>
+                  <td class="border border-slate-800 p-1 text-center">${i+1}</td>
+                  <td class="border border-slate-800 p-1 font-bold">${g.name}</td>
+                  <td class="border border-slate-800 p-1 text-center">${g.dob}</td>
+                  <td class="border border-slate-800 p-1 text-center">${g.profile === 'pedagogical' ? 'Педагогический' : 'Базовый'}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="4" class="border border-slate-800 p-1 text-center italic">— нет —</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      specContainer.innerHTML = html;
+    }
+
+    function openStudentModal(studentId = null) {
+      const modal = document.getElementById('studentModal');
+      const form = document.getElementById('studentForm');
+      form.reset();
+
+      if (studentId) {
+        const s = students.find(item => item.id === studentId);
+        if (s) {
+          document.getElementById('modalTitle').innerHTML =
+            `<i class="fa-solid fa-user-pen text-blue-400"></i> Редактировать данные: ${s.name}`;
+          document.getElementById('editStudentId').value = s.id;
+          document.getElementById('m_name').value = s.name || '';
+          document.getElementById('m_gender').value = s.gender || 'male';
+          document.getElementById('m_dob').value = s.dob || '';
+          document.getElementById('m_phone').value = s.phone || '';
+          document.getElementById('m_address').value = s.address || '';
+          document.getElementById('m_org').value = s.org || 'БРСМ';
+          document.getElementById('m_healthGroup').value = s.healthGroup || '';
+          document.getElementById('m_chronic').value = s.chronic || '';
+
+          // Mother
+          if (s.mother) {
+            document.getElementById('m_motherName').value = s.mother.name || '';
+            document.getElementById('m_motherPhone').value = s.mother.phone || '';
+            document.getElementById('m_motherWork').value = s.mother.work || '';
+            document.getElementById('m_motherEdu').value = s.mother.edu || 'higher';
+            document.getElementById('m_motherJob').value = s.mother.job || 'employee';
+          }
+
+          // Father
+          if (s.father) {
+            document.getElementById('m_fatherName').value = s.father.name || '';
+            document.getElementById('m_fatherPhone').value = s.father.phone || '';
+            document.getElementById('m_fatherWork').value = s.father.work || '';
+            document.getElementById('m_fatherEdu').value = s.father.edu || 'prof_tech';
+            document.getElementById('m_fatherJob').value = s.father.job || 'worker';
+          }
+
+          // Checkboxes
+          document.getElementById('m_isLargeFamily').checked = !!s.isLargeFamily;
+          document.getElementById('m_isSingleParent').checked = !!s.isSingleParent;
+          document.getElementById('m_isRisk').checked = !!s.isRisk;
+          document.getElementById('m_isSop').checked = !!s.isSop;
+          document.getElementById('m_isDisabled').checked = !!s.isDisabled;
+          document.getElementById('m_isGifted').checked = !!s.isGifted;
+          document.getElementById('m_isHomeSchool').checked = !!s.isHomeSchool;
+          document.getElementById('m_isChernobyl').checked = !!s.isChernobyl;
+
+          document.getElementById('m_singleParentReason').value = s.singleParentReason || '';
+          document.getElementById('m_disabilityDoc').value = s.disabilityDoc || '';
+
+          // Nutrition & Profile
+          document.getElementById('m_meal').value = s.meal || 'paid';
+          document.getElementById('m_profile').value = s.profile || 'base';
+        }
+      } else {
+        document.getElementById('modalTitle').innerHTML =
+          `<i class="fa-solid fa-user-plus text-blue-400"></i> Добавить нового ученика`;
+        document.getElementById('editStudentId').value = '';
+        // Set default values for new student
+        document.getElementById('m_meal').value = 'paid';
+        document.getElementById('m_profile').value = 'base';
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeStudentModal() {
+      document.getElementById('studentModal').classList.add('hidden');
+    }
+
+    function editStudent(id) {
+      openStudentModal(id);
+    }
+
+    function deleteStudent(id) {
+      const student = students.find(s => s.id === id);
+      if (!student) return;
+
+      if (window.confirm ? confirm(`Вы уверены, что хотите удалить ученика "${student.name}"?`) : true) {
+        students = students.filter(s => s.id !== id);
+        sortStudents();
+        saveToLocalStorage();
+        updateAllUI();
+        showToast('Ученик успешно удален');
+      }
+    }
+
+    function handleStudentFormSubmit(e) {
+      e.preventDefault();
+      const editId = document.getElementById('editStudentId').value;
+
+      const studentData = {
+        id: editId || 's_' + Date.now(),
+        name: document.getElementById('m_name').value.trim(),
+        gender: document.getElementById('m_gender').value,
+        dob: document.getElementById('m_dob').value.trim(),
+        phone: document.getElementById('m_phone').value.trim(),
+        address: document.getElementById('m_address').value.trim(),
+        org: document.getElementById('m_org').value,
+        healthGroup: document.getElementById('m_healthGroup').value.trim(),
+        chronic: document.getElementById('m_chronic').value.trim(),
+
+        mother: {
+          name: document.getElementById('m_motherName').value.trim(),
+          phone: document.getElementById('m_motherPhone').value.trim(),
+          work: document.getElementById('m_motherWork').value.trim(),
+          edu: document.getElementById('m_motherEdu').value,
+          job: document.getElementById('m_motherJob').value
+        },
+
+        father: {
+          name: document.getElementById('m_fatherName').value.trim(),
+          phone: document.getElementById('m_fatherPhone').value.trim(),
+          work: document.getElementById('m_fatherWork').value.trim(),
+          edu: document.getElementById('m_fatherEdu').value,
+          job: document.getElementById('m_fatherJob').value
+        },
+
+        isLargeFamily: document.getElementById('m_isLargeFamily').checked,
+        isSingleParent: document.getElementById('m_isSingleParent').checked,
+        isRisk: document.getElementById('m_isRisk').checked,
+        isSop: document.getElementById('m_isSop').checked,
+        isDisabled: document.getElementById('m_isDisabled').checked,
+        isGifted: document.getElementById('m_isGifted').checked,
+        isHomeSchool: document.getElementById('m_isHomeSchool').checked,
+        isChernobyl: document.getElementById('m_isChernobyl').checked,
+
+        singleParentReason: document.getElementById('m_singleParentReason').value.trim(),
+        disabilityDoc: document.getElementById('m_disabilityDoc').value.trim(),
+
+        meal: document.getElementById('m_meal').value,
+        profile: document.getElementById('m_profile').value
+      };
+
+      if (editId) {
+        const idx = students.findIndex(s => s.id === editId);
+        if (idx !== -1) students[idx] = studentData;
+      } else {
+        students.push(studentData);
+      }
+
+      sortStudents();
+      saveToLocalStorage();
+      updateAllUI();
+      closeStudentModal();
+      showToast(editId ? 'Данные ученика обновлены' : 'Ученик успешно добавлен');
+    }
+
+    function saveSettings() {
+      settings.className = document.getElementById('settingClassName').value.trim();
+      settings.academicYear = document.getElementById('settingAcademicYear').value.trim();
+      settings.teacher = document.getElementById('settingTeacher').value.trim();
+
+      saveToLocalStorage();
+      updateAllUI();
+      showToast('Настройки класса сохранены');
+    }
+
+    function resetToInitialData() {
+      if (confirm('Сбросить все изменения и восстановить исходный список из 22 учащихся?')) {
+        students = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
+        sortStudents();
+        saveToLocalStorage();
+        updateAllUI();
+        showToast('Данные сброшены к исходным');
+      }
+    }
+
+    function exportJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ settings, students }, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `Social_Passport_${settings.className.replace(/\s+/g, '_')}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('Файл бэкапа загружен');
+    }
+
+    function importJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed.students && Array.isArray(parsed.students)) {
+            students = parsed.students;
+            if (parsed.settings) settings = parsed.settings;
+            sortStudents();
+            saveToLocalStorage();
+            updateAllUI();
+            showToast('Данные успешно импортированы');
+          } else {
+            showToast('Неверный формат файла JSON');
+          }
+        } catch (err) {
+          showToast('Ошибка при чтении файла JSON');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function exportToCSV() {
+      let csv = "\uFEFF№;ФИО;Дата рождения;Пол;Телефон;Адрес;Группа здоровья;Питание;Профиль;Мать;Отец;Категории\n";
+      students.forEach((s, i) => {
+        const cats = [];
+        if (s.isLargeFamily) cats.push("Многодетные");
+        if (s.isSingleParent) cats.push("Неполная");
+        if (s.isGifted) cats.push("Одаренный");
+        if (s.isDisabled) cats.push("Инвалид");
+        if (s.isRisk) cats.push("Группа риска");
+
+        const mealMap = { paid: 'Платное', free: 'Бесплатное', none: 'Не питается' };
+        const profileMap = { base: 'Базовый', pedagogical: 'Педагогический' };
+
+        csv +=
+          `"${i+1}";"${s.name}";"${s.dob}";"${s.gender === 'male'?'Мальчик':'Девочка'}";"${s.phone}";"${s.address}";"${s.healthGroup}";"${mealMap[s.meal] || '—'}";"${profileMap[s.profile] || '—'}";"${s.mother?s.mother.name:''}";"${s.father?s.father.name:''}";"${cats.join(', ')}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Social_Passport_${settings.className}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Экспорт в CSV завершен');
+    }
+
+    function getShortName(fullName) {
+      if (!fullName) return '';
+      const parts = fullName.trim().split(/\s+/);
+      if (parts.length >= 3) return `${parts[0]} ${parts[1][0].toUpperCase()}.${parts[2][0].toUpperCase()}.`;
+      return fullName;
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
